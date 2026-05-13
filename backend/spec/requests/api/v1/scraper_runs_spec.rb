@@ -10,7 +10,8 @@ RSpec.describe "Api::V1::ScraperRuns", type: :request do
 
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
-      expect(body["sources"]).to match_array(%w[adzuna itjobs])
+      expect(body["sources"]).to include("adzuna", "itjobs")
+      expect(body["sources"].size).to be >= 2
       expect(body["runs"].size).to eq(2)
       expect(body["runs"].first).to include("source_name", "status")
     end

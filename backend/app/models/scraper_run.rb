@@ -1,6 +1,8 @@
 class ScraperRun < ApplicationRecord
   STATUSES = %w[pending running succeeded failed].freeze
 
+  belongs_to :search_batch, optional: true
+
   validates :source_name, presence: true
   validates :status, inclusion: { in: STATUSES }
 

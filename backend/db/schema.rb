@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_14_120001) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_15_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -61,9 +61,25 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_14_120001) do
     t.datetime "finished_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "search_batch_id"
     t.index ["created_at"], name: "index_scraper_runs_on_created_at"
+    t.index ["search_batch_id"], name: "index_scraper_runs_on_search_batch_id"
     t.index ["source_name"], name: "index_scraper_runs_on_source_name"
     t.index ["status"], name: "index_scraper_runs_on_status"
+  end
+
+  create_table "search_batches", force: :cascade do |t|
+    t.string "status", default: "pending", null: false
+    t.string "sources_requested", default: [], null: false, array: true
+    t.integer "offers_found", default: 0, null: false
+    t.integer "offers_created", default: 0, null: false
+    t.integer "offers_skipped", default: 0, null: false
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_search_batches_on_created_at"
+    t.index ["status"], name: "index_search_batches_on_status"
   end
 
   create_table "sources", force: :cascade do |t|
@@ -87,5 +103,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_14_120001) do
 
   add_foreign_key "notes", "offers"
   add_foreign_key "offers", "sources"
+  add_foreign_key "scraper_runs", "search_batches", on_delete: :nullify
   add_foreign_key "status_changes", "offers"
 end
