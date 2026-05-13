@@ -47,10 +47,10 @@ net_empregos_daily:
   cron: "20 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "Net-Empregos · RSS"
+  description: "Net-Empregos · RSS · Informática (Programação) only"
   args:
     - "net_empregos"
-    - keywords: "developer"
+    - category: "Programação"
 
 teamlyzer_daily:
   cron: "25 6 * * *"

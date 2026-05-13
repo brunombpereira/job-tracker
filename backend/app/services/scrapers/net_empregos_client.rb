@@ -1,10 +1,13 @@
 module Scrapers
   # Net-Empregos public RSS feed at `/rssfeed.asp`. Encoding is iso-8859-1
   # and the description carries structured "Empresa:/Categoria:/Zona:/Descrição:"
-  # fields rendered as HTML, which we parse out for clean Offer attrs.
+  # fields rendered as HTML.
   #
-  # A `keywords` param filters entries client-side by title/description
-  # (the feed itself is unfiltered).
+  # The feed itself ignores any `categoria=` query parameter and returns
+  # all 250 most-recent listings (mixed categories), so we filter
+  # client-side on the parsed Categoria field — `category: "Programação"`
+  # by default. A `keywords` param does an additional title/description
+  # substring match on top.
   class NetEmpregosClient < BaseClient
     SOURCE_NAME  = "net_empregos"
     SOURCE_COLOR = "#1d3557"
@@ -17,16 +20,16 @@ module Scrapers
       end
       raise FetchError, "HTTP #{res.status}" unless res.success?
 
-      body = res.body.dup.force_encoding("ISO-8859-1").encode("UTF-8", invalid: :replace, undef: :replace)
+      body = transcode_to_utf8(res.body)
       feed = Feedjira.parse(body)
       entries = Array(feed&.entries)
 
-      kw = params[:keywords].to_s.downcase
-      if kw.present?
-        entries = entries.select do |e|
-          "#{e.title} #{e.summary}".to_s.downcase.include?(kw)
-        end
-      end
+      category = params[:category].to_s.strip.downcase
+      keywords = params[:keywords].to_s.strip.downcase
+
+      entries = entries.select { |e| parsed_category(e).include?(category) } if category.present?
+      entries = entries.select { |e| "#{e.title} #{e.summary}".downcase.include?(keywords) } if keywords.present?
+
       entries
     rescue Faraday::Error, Feedjira::NoParserAvailable => e
       raise FetchError, "Net-Empregos fetch failed: #{e.message}"
@@ -34,8 +37,8 @@ module Scrapers
 
     def normalize(entry)
       # Source wraps already-encoded HTML inside CDATA — unescape entities
-      # first, then convert <br> to newlines so the sanitizer-stripped text
-      # retains the per-field boundary the regex parser needs.
+      # first, then convert <br> to newlines so the sanitizer-stripped
+      # text retains the per-field boundary the regex parser needs.
       decoded = CGI.unescapeHTML(entry.summary.to_s).gsub(/<br\s*\/?>/i, "\n")
       text = ActionView::Base.full_sanitizer.sanitize(decoded)
       fields = parse_fields(text)
@@ -56,9 +59,23 @@ module Scrapers
 
     private
 
-    # Strip the trailing "Ver Oferta de Emprego" / "Emprego" link boilerplate
-    # and parse the labelled prefix into a Hash.
     LABELS = %w[Empresa Categoria Zona Data Descrição].freeze
+
+    # Net-Empregos serves the feed as iso-8859-1, but unit tests inline
+    # UTF-8 XML — read the declared encoding from the prolog and only
+    # transcode when it isn't already UTF-8.
+    def transcode_to_utf8(body)
+      declared = body.byteslice(0, 200).to_s.match(/encoding=["']([^"']+)["']/i)&.[](1)
+      return body if declared.nil? || declared.upcase == "UTF-8"
+
+      body.dup.force_encoding(declared).encode("UTF-8", invalid: :replace, undef: :replace)
+    end
+
+    def parsed_category(entry)
+      decoded = CGI.unescapeHTML(entry.summary.to_s).gsub(/<br\s*\/?>/i, "\n")
+      text = ActionView::Base.full_sanitizer.sanitize(decoded)
+      parse_fields(text)["Categoria"].to_s.downcase
+    end
 
     def parse_fields(text)
       LABELS.each_with_object({}) do |label, out|

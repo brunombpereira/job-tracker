@@ -68,7 +68,7 @@ module Scrapers
         key: "net_empregos", display_name: "Net-Empregos", tag: "RSS",
         client_class_name: "Scrapers::NetEmpregosClient",
         color: "#1d3557",
-        default_params: { keywords: "developer" },
+        default_params: { category: "Programação" },
         env_required: []
       ),
       Source.new(
