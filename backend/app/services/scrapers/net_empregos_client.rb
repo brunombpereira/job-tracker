@@ -20,8 +20,11 @@ module Scrapers
       end
       raise FetchError, "HTTP #{res.status}" unless res.success?
 
-      body = transcode_to_utf8(res.body)
-      feed = Feedjira.parse(body)
+      # Feedjira reads the XML prolog and decodes iso-8859-1 → UTF-8 on
+      # its own; manually transcoding here used to double-encode the
+      # accented characters (Indústria → IndÃºstria) and break the
+      # category filter.
+      feed = Feedjira.parse(res.body)
       entries = Array(feed&.entries)
 
       category = params[:category].to_s.strip.downcase
@@ -60,16 +63,6 @@ module Scrapers
     private
 
     LABELS = %w[Empresa Categoria Zona Data Descrição].freeze
-
-    # Net-Empregos serves the feed as iso-8859-1, but unit tests inline
-    # UTF-8 XML — read the declared encoding from the prolog and only
-    # transcode when it isn't already UTF-8.
-    def transcode_to_utf8(body)
-      declared = body.byteslice(0, 200).to_s.match(/encoding=["']([^"']+)["']/i)&.[](1)
-      return body if declared.nil? || declared.upcase == "UTF-8"
-
-      body.dup.force_encoding(declared).encode("UTF-8", invalid: :replace, undef: :replace)
-    end
 
     def parsed_category(entry)
       decoded = CGI.unescapeHTML(entry.summary.to_s).gsub(/<br\s*\/?>/i, "\n")

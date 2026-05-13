@@ -35,10 +35,35 @@ module Offers
       attrs = extract_attrs(html)
       raise ImportError, "Não encontrei JobPosting nem OpenGraph nesta página" if attrs.blank?
 
-      Offer.create!(attrs.merge(url: @url, status: "new"))
+      source = source_for_host
+      Offer.create!(attrs.merge(url: @url, status: "new", source_id: source.id))
     end
 
     private
+
+    # Map well-known job-board hostnames onto pretty display names + brand
+    # colors so the FiltersPanel chip and SourceCard render meaningfully
+    # for offers that arrive via the importer. New entries are matched by
+    # `host.include?(key)` so subdomains (pt.indeed.com, uk.linkedin.com)
+    # all bucket into one Source row.
+    KNOWN_HOSTS = {
+      "linkedin.com"  => { name: "LinkedIn",  color: "#0a66c2" },
+      "indeed.com"    => { name: "Indeed",    color: "#2557a7" },
+      "glassdoor"     => { name: "Glassdoor", color: "#0caa41" },
+      "wellfound.com" => { name: "Wellfound", color: "#000000" },
+      "angel.co"      => { name: "Wellfound", color: "#000000" },
+      "lever.co"      => { name: "Lever",     color: "#7a3ff7" },
+      "greenhouse.io" => { name: "Greenhouse", color: "#19825e" },
+      "workable.com"  => { name: "Workable",  color: "#5b3aeb" },
+      "ashbyhq.com"   => { name: "Ashby",     color: "#1f1f1f" },
+    }.freeze
+
+    def source_for_host
+      h = host
+      meta = KNOWN_HOSTS.find { |key, _| h.include?(key) }&.last
+      meta ||= { name: h.split(".").first.to_s.capitalize.presence || "Imported", color: "#94a3b8" }
+      Source.find_or_create_by!(name: meta[:name]) { |s| s.color = meta[:color] }
+    end
 
     def fetch_html
       res = Faraday.get(@url) do |r|
