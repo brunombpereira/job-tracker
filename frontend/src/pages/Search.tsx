@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { SourceCard } from "@/components/SourceCard";
 import { UrlImportPanel } from "@/components/UrlImportPanel";
+import { WipeOffersButton } from "@/components/WipeOffersButton";
 import {
   useCreateBatch,
   useSearchBatch,
@@ -92,27 +93,30 @@ export const Search = () => {
             Duplicados são ignorados por URL.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onSearch}
-          disabled={create.isPending || !!isLive || selectedKeys.length === 0}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isLive ? (
-            <>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-surface-raised/80" />
-              A procurar em {liveBatch?.runs.length ?? 0}/{liveBatch?.sources_requested.length ?? 0}…
-            </>
-          ) : (
-            <>
-              <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3-3" />
-              </svg>
-              Procurar em {selectedKeys.length} fonte(s)
-            </>
-          )}
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <WipeOffersButton />
+          <button
+            type="button"
+            onClick={onSearch}
+            disabled={create.isPending || !!isLive || selectedKeys.length === 0}
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-5 text-sm font-semibold text-white shadow-soft transition hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isLive ? (
+              <>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-surface-raised/80" />
+                A procurar em {liveBatch?.runs.length ?? 0}/{liveBatch?.sources_requested.length ?? 0}…
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current" strokeWidth="2">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3-3" />
+                </svg>
+                Procurar em {selectedKeys.length} fonte(s)
+              </>
+            )}
+          </button>
+        </div>
       </header>
 
       {/* Source grid */}

@@ -11,7 +11,7 @@ module Api
         scope = apply_filters(scope)
         scope = apply_sort(scope)
 
-        pagy, offers = pagy(scope, items: params.fetch(:per_page, 25))
+        pagy, offers = pagy(scope, items: params.fetch(:per_page, 24))
 
         response.set_header("Total-Count",  pagy.count.to_s)
         response.set_header("Per-Page",     pagy.items.to_s)
@@ -99,6 +99,19 @@ module Api
           error_count: errors.size,
           errors:      errors
         }
+      end
+
+      # DELETE /api/v1/offers/destroy_all
+      # Bulk-wipe the offers table so the user can start a clean search
+      # from scratch. By default only non-archived offers are removed —
+      # pass `?include_archived=true` to drop everything. Returns the
+      # number of offers actually deleted.
+      def destroy_all
+        scope = Offer.all
+        scope = scope.active unless params[:include_archived] == "true"
+        deleted = scope.count
+        scope.destroy_all
+        render json: { deleted: deleted }
       end
 
       # POST /api/v1/offers/import_url

@@ -86,27 +86,27 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
               offer.title
             )}
           </h3>
-          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-ink-soft">
-            <span className="inline-flex items-center gap-1 font-medium">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-soft">
+            <span className="inline-flex min-w-0 max-w-full items-center gap-1 font-medium">
               <BuildingIcon />
               <span className="truncate">{offer.company}</span>
             </span>
             {offer.location && (
-              <span className="inline-flex items-center gap-1 text-ink-muted">
+              <span className="inline-flex min-w-0 max-w-full items-center gap-1 text-ink-muted">
                 <LocationIcon />
                 <span className="truncate">{offer.location}</span>
               </span>
             )}
             {offer.modality && (
               <span
-                className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-medium capitalize text-ink-soft"
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-medium capitalize text-ink-soft"
                 title={offer.modality}
               >
                 <span aria-hidden="true">{MODALITY_ICON[offer.modality]}</span>
                 {offer.modality}
               </span>
             )}
-          </p>
+          </div>
         </div>
         <StatusBadge status={offer.status} />
       </header>
