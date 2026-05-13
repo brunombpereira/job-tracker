@@ -11,9 +11,9 @@ module Api
 
         pagy, offers = pagy(scope, items: params.fetch(:per_page, 25))
 
-        response.set_header("Total-Count",  pagy.count)
-        response.set_header("Per-Page",     pagy.items)
-        response.set_header("Current-Page", pagy.page)
+        response.set_header("Total-Count",  pagy.count.to_s)
+        response.set_header("Per-Page",     pagy.items.to_s)
+        response.set_header("Current-Page", pagy.page.to_s)
 
         render json: offers.as_json(include: :source)
       end

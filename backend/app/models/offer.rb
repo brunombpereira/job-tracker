@@ -9,7 +9,13 @@ class Offer < ApplicationRecord
 
   validates :title, :company, presence: true
   validates :url, uniqueness: { allow_blank: true }
-  validates :match_score, numericality: { only_integer: true, in: 1..5 }, allow_nil: true
+  validates :match_score,
+            numericality: {
+              only_integer: true,
+              greater_than_or_equal_to: 1,
+              less_than_or_equal_to: 5
+            },
+            allow_nil: true
   validates :status,   inclusion: { in: STATUSES }
   validates :modality, inclusion: { in: MODALITIES }, allow_nil: true
 
