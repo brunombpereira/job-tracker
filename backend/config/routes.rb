@@ -29,7 +29,7 @@ Rails.application.routes.draw do
       end
 
       resources :scraper_runs, only: %i[index create]
-      resources :search_batches, only: %i[create show]
+      resources :search_batches, only: %i[index create show]
 
       get "stats", to: "stats#index"
     end

@@ -4,6 +4,16 @@ module Api
     # (or an optional `sources` array) to fire every ready scraper in
     # parallel, then polls GET /:id until the batch is terminal.
     class SearchBatchesController < ApplicationController
+      # GET /api/v1/search_batches
+      # Returns the registered source catalog (with credential-readiness)
+      # plus the latest batches for the history panel.
+      def index
+        render json: {
+          sources: Scrapers::Registry.public_list,
+          batches: SearchBatch.recent.limit(20).map { |b| serialize(b) }
+        }
+      end
+
       # POST /api/v1/search_batches
       # Body (optional):
       #   { sources: ["adzuna", "itjobs"], params_by_source: { "adzuna": {...} } }
