@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { Offer } from "@/types/offer";
 import { useCreateNote, useDeleteNote, useOfferDetail } from "@/hooks/useOfferDetail";
 import { StatusBadge } from "./StatusBadge";
+import { DescriptionView } from "./DescriptionView";
 
 interface Props {
   offer: Offer;
@@ -110,7 +111,7 @@ export const OfferDetail = ({ offer, onEdit }: Props) => {
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
             Description
           </h4>
-          <p className="whitespace-pre-line text-sm text-ink-soft">{detail.description}</p>
+          <DescriptionView html={detail.description} stack={detail.stack} />
         </div>
       )}
 

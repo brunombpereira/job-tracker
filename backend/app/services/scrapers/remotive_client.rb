@@ -28,20 +28,13 @@ module Scrapers
         location:     raw["candidate_required_location"].presence,
         modality:     "remoto",
         url:          raw["url"],
-        description:  sanitize(raw["description"]),
+        description:  safe_html(raw["description"]),
         posted_date:  raw["publication_date"]&.then { |d| Date.parse(d) rescue nil },
         salary_range: raw["salary"].to_s.strip.presence,
         status:       "new"
       }
     rescue StandardError
       nil
-    end
-
-    private
-
-    def sanitize(html, max: 2000)
-      return nil if html.blank?
-      ActionView::Base.full_sanitizer.sanitize(html).to_s.strip[0, max]
     end
   end
 end

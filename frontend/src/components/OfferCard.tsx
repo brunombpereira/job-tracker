@@ -1,8 +1,28 @@
 import { useState } from "react";
-import type { Offer, OfferStatus } from "@/types/offer";
+import type { Offer, OfferModality, OfferStatus } from "@/types/offer";
 import { STATUS_TRANSITIONS } from "@/types/offer";
 import { StatusBadge } from "./StatusBadge";
 import { useArchiveOffer, useChangeStatus } from "@/hooks/useOffers";
+
+const MODALITY_ICON: Record<OfferModality, string> = {
+  remoto:    "🏠",
+  hibrido:   "🔀",
+  presencial: "🏢",
+};
+
+const LocationIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
+
+const BuildingIcon = () => (
+  <svg viewBox="0 0 24 24" className="h-3 w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />
+    <path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
+  </svg>
+);
 
 const MatchDots = ({ score }: { score: number | null }) => {
   const filled = score ?? 0;
@@ -66,10 +86,26 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
               offer.title
             )}
           </h3>
-          <p className="mt-0.5 truncate text-sm text-ink-soft">
-            <span className="font-medium">{offer.company}</span>
-            {offer.location && <span className="text-ink-muted"> · {offer.location}</span>}
-            {offer.modality && <span className="text-ink-muted"> · {offer.modality}</span>}
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-ink-soft">
+            <span className="inline-flex items-center gap-1 font-medium">
+              <BuildingIcon />
+              <span className="truncate">{offer.company}</span>
+            </span>
+            {offer.location && (
+              <span className="inline-flex items-center gap-1 text-ink-muted">
+                <LocationIcon />
+                <span className="truncate">{offer.location}</span>
+              </span>
+            )}
+            {offer.modality && (
+              <span
+                className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2 py-0.5 text-[11px] font-medium capitalize text-ink-soft"
+                title={offer.modality}
+              >
+                <span aria-hidden="true">{MODALITY_ICON[offer.modality]}</span>
+                {offer.modality}
+              </span>
+            )}
           </p>
         </div>
         <StatusBadge status={offer.status} />

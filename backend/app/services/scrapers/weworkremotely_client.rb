@@ -29,7 +29,7 @@ module Scrapers
         location:    "Remote",
         modality:    "remoto",
         url:         entry.url || entry.entry_id,
-        description: ActionView::Base.full_sanitizer.sanitize(entry.summary.to_s)[0, 2000],
+        description: safe_html(entry.summary.to_s),
         posted_date: entry.published&.to_date,
         status:      "new"
       }

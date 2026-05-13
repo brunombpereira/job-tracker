@@ -53,14 +53,24 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
 
   return (
     <aside className="space-y-5 rounded-xl border border-edge bg-surface-raised p-5 text-sm shadow-soft">
-      <header className="flex items-center justify-between">
-        <h3 className="font-serif text-base text-ink">Filtros</h3>
+      <header className="flex items-center justify-between gap-2">
+        <h3 className="inline-flex items-center gap-2 font-serif text-base text-ink">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-ink-muted" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+          </svg>
+          Filtros
+        </h3>
         {activeCount > 0 && (
           <button
             type="button"
             onClick={clearAll}
-            className="text-xs text-ink-muted underline-offset-2 hover:text-accent hover:underline"
+            className="inline-flex items-center gap-1 rounded-md border border-edge-strong bg-surface px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-ink-soft transition hover:border-accent hover:text-accent"
+            aria-label={`Limpar ${activeCount} filtro(s)`}
           >
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
             Limpar ({activeCount})
           </button>
         )}
@@ -93,21 +103,29 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
 
       {sourcesWithOffers.length > 0 && (
         <section>
-          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
-            Fonte
-          </h4>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => setSource(undefined)}
-              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
-                filters.source_id == null
-                  ? "border-accent bg-accent text-white"
-                  : "border-edge-strong bg-surface-raised text-ink-soft hover:border-accent"
-              }`}
-            >
-              Todas
-            </button>
+          <div className="mb-2 flex items-center justify-between">
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+              Fonte
+            </h4>
+            {filters.source_id != null && (
+              <button
+                type="button"
+                onClick={() => setSource(undefined)}
+                className="text-[10px] uppercase tracking-wide text-ink-muted underline-offset-2 hover:text-accent hover:underline"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+          <div
+            className="grid gap-1.5"
+            style={{
+              gridTemplateColumns: `repeat(${Math.max(
+                2,
+                Math.ceil(sourcesWithOffers.length / 2),
+              )}, minmax(0, 1fr))`,
+            }}
+          >
             {sourcesWithOffers.map((s) => {
               const active = filters.source_id === s.id;
               return (
@@ -115,20 +133,22 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
                   key={s.id}
                   type="button"
                   onClick={() => setSource(active ? undefined : s.id)}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
+                  className={`inline-flex items-center gap-1.5 truncate rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${
                     active
                       ? "border-accent bg-accent text-white"
                       : "border-edge-strong bg-surface-raised text-ink-soft hover:border-accent"
                   }`}
-                  title={`${s.count} oferta(s)`}
+                  title={`${s.name} · ${s.count} oferta(s)`}
                 >
                   <span
                     aria-hidden="true"
-                    className="h-1.5 w-1.5 rounded-full"
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
                     style={{ backgroundColor: active ? "currentColor" : s.color }}
                   />
-                  {s.name}
-                  <span className={active ? "opacity-80" : "text-ink-muted"}>· {s.count}</span>
+                  <span className="truncate">{s.name}</span>
+                  <span className={`ml-auto shrink-0 ${active ? "opacity-80" : "text-ink-muted"}`}>
+                    {s.count}
+                  </span>
                 </button>
               );
             })}

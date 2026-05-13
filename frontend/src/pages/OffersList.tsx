@@ -12,6 +12,7 @@ import { OfferForm } from "@/components/OfferForm";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { OfferDetail } from "@/components/OfferDetail";
 import { AppHeader, type Tab } from "@/components/AppHeader";
+import { SortDropdown } from "@/components/SortDropdown";
 import type { Offer, OfferFilters } from "@/types/offer";
 
 interface OffersListProps {
@@ -95,36 +96,55 @@ export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
         subtitle="Gerir candidaturas a empregos"
         actions={
           <>
-            <div className="inline-flex rounded-lg border border-edge bg-surface p-0.5 text-xs font-medium">
+            <div className="inline-flex h-9 items-center rounded-lg border border-edge bg-surface p-0.5 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setView("list")}
-                className={`rounded-md px-3 py-1.5 transition ${
+                className={`inline-flex h-full items-center gap-1.5 rounded-md px-3 transition ${
                   view === "list"
                     ? "bg-surface-raised text-ink shadow-soft"
                     : "text-ink-muted hover:text-ink"
                 }`}
+                aria-label="Vista em lista"
               >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
                 Lista
               </button>
               <button
                 type="button"
                 onClick={() => setView("kanban")}
-                className={`rounded-md px-3 py-1.5 transition ${
+                className={`inline-flex h-full items-center gap-1.5 rounded-md px-3 transition ${
                   view === "kanban"
                     ? "bg-surface-raised text-ink shadow-soft"
                     : "text-ink-muted hover:text-ink"
                 }`}
+                aria-label="Vista Kanban"
               >
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="6" height="18" rx="1" />
+                  <rect x="11" y="3" width="6" height="12" rx="1" />
+                  <rect x="19" y="3" width="2" height="8" rx="1" />
+                </svg>
                 Kanban
               </button>
             </div>
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep"
             >
-              + Nova oferta
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Nova oferta
             </button>
           </>
         }
@@ -144,21 +164,18 @@ export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
             <button
               type="button"
               onClick={() => setMobileFiltersOpen(true)}
-              className="md:hidden rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm font-medium text-ink-soft shadow-soft transition hover:bg-surface-sunken"
+              className="md:hidden inline-flex h-9 items-center gap-1.5 rounded-lg border border-edge-strong bg-surface-raised px-3 text-sm font-medium text-ink-soft shadow-soft transition hover:bg-surface-sunken"
             >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 6h16M7 12h10M10 18h4" />
+              </svg>
               Filtros{activeFilterCount > 0 && ` · ${activeFilterCount}`}
             </button>
-            <select
+            <SortDropdown
               value={filters.sort ?? "match_score:desc"}
-              onChange={(e) => setFilters({ ...filters, sort: e.target.value, page: 1 })}
-              className="rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm text-ink shadow-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+              options={SORT_OPTIONS}
+              onChange={(v) => setFilters({ ...filters, sort: v, page: 1 })}
+            />
           </div>
         </div>
 

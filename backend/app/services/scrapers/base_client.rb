@@ -47,6 +47,7 @@ module Scrapers
         next skipped += 1 if excluded_by_seniority?(a[:title])
         next skipped += 1 if Offer.exists?(url: a[:url])
 
+        a[:match_score] ||= Scorers::ProfileMatcher.score(a)
         Offer.create!(a.merge(source_id: source.id))
         created += 1
       rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
@@ -63,6 +64,25 @@ module Scrapers
 
     def normalize(_raw)
       raise NotImplementedError
+    end
+
+    # Shared description sanitizer. Allows the lightweight markup that
+    # makes descriptions readable (paragraphs, lists, emphasis, headings,
+    # links) and strips everything else. Subclasses call this in their
+    # normalize() instead of writing their own truncate_html helpers.
+    DESCRIPTION_TAGS = %w[p br ul ol li strong b em i h3 h4 h5 a code].freeze
+    DESCRIPTION_ATTRS = %w[href].freeze
+
+    def safe_html(html, max: 5000)
+      return nil if html.blank?
+      decoded = html.to_s
+      decoded = CGI.unescapeHTML(decoded).gsub(/<br\s*\/?>/i, "<br>") if decoded.match?(/&lt;|&gt;|&amp;/)
+      sanitized = Rails::Html::SafeListSanitizer.new.sanitize(
+        decoded,
+        tags: DESCRIPTION_TAGS,
+        attributes: DESCRIPTION_ATTRS,
+      )
+      sanitized.strip[0, max]
     end
 
     private

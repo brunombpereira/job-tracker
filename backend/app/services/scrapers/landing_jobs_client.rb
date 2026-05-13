@@ -31,7 +31,7 @@ module Scrapers
         location:     format_location(raw["locations"]),
         modality:     raw["remote"] ? "remoto" : "presencial",
         url:          raw["url"],
-        description:  sanitize(raw["role_description"]),
+        description:  safe_html(raw["role_description"]),
         posted_date:  raw["published_at"]&.then { |d| Date.parse(d) rescue nil },
         salary_range: format_salary(raw),
         stack:        Array(raw["tags"]),
@@ -68,9 +68,5 @@ module Scrapers
       nil
     end
 
-    def sanitize(html, max: 2000)
-      return nil if html.blank?
-      ActionView::Base.full_sanitizer.sanitize(html).to_s.strip[0, max]
-    end
   end
 end

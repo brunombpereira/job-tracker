@@ -11,7 +11,7 @@ export interface UrlState {
 }
 
 const DEFAULT_STATE: UrlState = {
-  filters: { sort: "match_score:desc", per_page: 25, page: 1 },
+  filters: { sort: "match_score:desc", per_page: 24, page: 1 },
   view: "list",
   searchInput: "",
 };
@@ -80,7 +80,7 @@ export function toSearchParams(state: UrlState): URLSearchParams {
   if (f.search) p.set("search", f.search);
   if (f.sort && f.sort !== "match_score:desc") p.set("sort", f.sort);
   if (f.page && f.page !== 1) p.set("page", String(f.page));
-  if (f.per_page && f.per_page !== 25) p.set("per_page", String(f.per_page));
+  if (f.per_page && f.per_page !== 24) p.set("per_page", String(f.per_page));
   if (f.include_archived) p.set("include_archived", "true");
   if (state.view === "kanban") p.set("view", "kanban");
 
