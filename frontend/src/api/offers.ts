@@ -1,0 +1,60 @@
+import { api } from "./client";
+import type { Offer, OfferFilters, OfferStatus } from "@/types/offer";
+
+const buildParams = (filters: OfferFilters) => {
+  const params: Record<string, string | number> = {};
+  if (filters.status?.length) params.status = filters.status.join(",");
+  if (filters.modality) params.modality = filters.modality;
+  if (filters.match_score_gte) params.match_score_gte = filters.match_score_gte;
+  if (filters.location) params.location = filters.location;
+  if (filters.search) params.search = filters.search;
+  if (filters.sort) params.sort = filters.sort;
+  if (filters.page) params.page = filters.page;
+  if (filters.per_page) params.per_page = filters.per_page;
+  return params;
+};
+
+export interface OffersResponse {
+  offers: Offer[];
+  total: number;
+  page: number;
+  perPage: number;
+}
+
+export const listOffers = async (filters: OfferFilters = {}): Promise<OffersResponse> => {
+  const res = await api.get<Offer[]>("/offers", { params: buildParams(filters) });
+  return {
+    offers: res.data,
+    total: Number(res.headers["total-count"] ?? res.data.length),
+    page: Number(res.headers["current-page"] ?? 1),
+    perPage: Number(res.headers["per-page"] ?? 25),
+  };
+};
+
+export const getOffer = async (id: number): Promise<Offer> => {
+  const res = await api.get<Offer>(`/offers/${id}`);
+  return res.data;
+};
+
+export const createOffer = async (data: Partial<Offer>): Promise<Offer> => {
+  const res = await api.post<Offer>("/offers", { offer: data });
+  return res.data;
+};
+
+export const updateOffer = async (id: number, data: Partial<Offer>): Promise<Offer> => {
+  const res = await api.patch<Offer>(`/offers/${id}`, { offer: data });
+  return res.data;
+};
+
+export const changeStatus = async (
+  id: number,
+  status: OfferStatus,
+  reason?: string,
+): Promise<Offer> => {
+  const res = await api.patch<Offer>(`/offers/${id}/status`, { status, reason });
+  return res.data;
+};
+
+export const archiveOffer = async (id: number): Promise<void> => {
+  await api.delete(`/offers/${id}`);
+};

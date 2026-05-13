@@ -1,0 +1,22 @@
+# Backend (Rails) — see backend/.gitignore for more
+backend/log/*
+backend/tmp/*
+backend/.bundle/
+backend/vendor/bundle/
+
+# Frontend (Vite/React) — see frontend/.gitignore for more
+frontend/node_modules/
+frontend/dist/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+config/master.key
