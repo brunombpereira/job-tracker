@@ -9,6 +9,7 @@ import { CardSkeletonGrid } from "@/components/CardSkeleton";
 import { Modal } from "@/components/Modal";
 import { OfferForm } from "@/components/OfferForm";
 import { KanbanBoard } from "@/components/KanbanBoard";
+import { OfferDetail } from "@/components/OfferDetail";
 import type { Offer, OfferFilters } from "@/types/offer";
 
 type ViewMode = "list" | "kanban";
@@ -51,6 +52,7 @@ export const OffersList = () => {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Offer | undefined>();
+  const [detailOf, setDetailOf] = useState<Offer | undefined>();
 
   const openCreate = () => {
     setEditing(undefined);
@@ -59,8 +61,11 @@ export const OffersList = () => {
   const openEdit = (offer: Offer) => {
     setEditing(offer);
     setFormOpen(true);
+    setDetailOf(undefined);
   };
+  const openDetail = (offer: Offer) => setDetailOf(offer);
   const closeForm = () => setFormOpen(false);
+  const closeDetail = () => setDetailOf(undefined);
 
   const offers = data?.offers ?? [];
   const total = data?.total ?? 0;
@@ -181,7 +186,12 @@ export const OffersList = () => {
               <>
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {offers.map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} onEdit={openEdit} />
+                    <OfferCard
+                      key={offer.id}
+                      offer={offer}
+                      onEdit={openEdit}
+                      onOpen={openDetail}
+                    />
                   ))}
                 </div>
                 <Pagination
@@ -201,7 +211,7 @@ export const OffersList = () => {
                     Lista para veres o resto.
                   </div>
                 )}
-                <KanbanBoard offers={offers} onCardClick={openEdit} />
+                <KanbanBoard offers={offers} onCardClick={openDetail} />
               </>
             )}
           </section>
@@ -215,6 +225,24 @@ export const OffersList = () => {
         maxWidth="max-w-2xl"
       >
         <OfferForm offer={editing} onSaved={closeForm} onCancel={closeForm} />
+      </Modal>
+
+      <Modal
+        open={Boolean(detailOf)}
+        onClose={closeDetail}
+        title={detailOf ? `${detailOf.company} · ${detailOf.title}` : ""}
+        maxWidth="max-w-2xl"
+      >
+        {detailOf && (
+          <OfferDetail
+            offer={detailOf}
+            onEdit={() => {
+              const o = detailOf;
+              closeDetail();
+              openEdit(o);
+            }}
+          />
+        )}
       </Modal>
     </div>
   );

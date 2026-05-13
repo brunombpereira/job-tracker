@@ -29,6 +29,9 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
   const setLocation = (loc: string) =>
     onChange({ ...filters, location: loc || undefined, page: 1 });
 
+  const setArchived = (on: boolean) =>
+    onChange({ ...filters, include_archived: on || undefined, page: 1 });
+
   const clearAll = () =>
     onChange({ sort: filters.sort, per_page: filters.per_page, search: filters.search });
 
@@ -37,7 +40,8 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
     (filters.modality ? 1 : 0) +
     (filters.match_score_gte ? 1 : 0) +
     (filters.match_score_lte ? 1 : 0) +
-    (filters.location ? 1 : 0);
+    (filters.location ? 1 : 0) +
+    (filters.include_archived ? 1 : 0);
 
   return (
     <aside className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 text-sm">
@@ -135,6 +139,18 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
           onChange={(e) => setLocation(e.target.value)}
           className="block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
         />
+      </section>
+
+      <section className="border-t border-slate-100 pt-3">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700">
+          <input
+            type="checkbox"
+            checked={Boolean(filters.include_archived)}
+            onChange={(e) => setArchived(e.target.checked)}
+            className="h-3.5 w-3.5 rounded border-slate-300 text-brand-accent focus:ring-brand-accent"
+          />
+          Mostrar arquivadas
+        </label>
       </section>
     </aside>
   );

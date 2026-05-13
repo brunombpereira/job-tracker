@@ -45,6 +45,26 @@ export interface OfferFilters {
   sort?: string;
   page?: number;
   per_page?: number;
+  include_archived?: boolean;
+}
+
+export interface Note {
+  id: number;
+  content: string;
+  created_at: string;
+}
+
+export interface StatusChange {
+  id: number;
+  from_status: OfferStatus | null;
+  to_status: OfferStatus;
+  reason: string | null;
+  created_at: string;
+}
+
+export interface OfferDetail extends Offer {
+  notes: Note[];
+  status_changes: StatusChange[];
 }
 
 export const STATUS_VALUES: OfferStatus[] = [

@@ -16,8 +16,8 @@ class Offer < ApplicationRecord
   }.freeze
 
   belongs_to :source, optional: true
-  has_many :notes,           dependent: :destroy
-  has_many :status_changes,  dependent: :destroy
+  has_many :notes,           -> { order(created_at: :desc) }, dependent: :destroy
+  has_many :status_changes,  -> { order(created_at: :asc) },  dependent: :destroy
 
   validates :title, :company, presence: true
   validates :url, uniqueness: { allow_blank: true }

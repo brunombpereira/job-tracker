@@ -12,6 +12,7 @@ Rails.application.routes.draw do
           post :import
           get :export, defaults: { format: :csv }
         end
+        resources :notes, only: %i[create destroy]
       end
 
       get "stats", to: "stats#index"

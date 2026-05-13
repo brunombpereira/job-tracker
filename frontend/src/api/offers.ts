@@ -1,5 +1,5 @@
 import { api } from "./client";
-import type { Offer, OfferFilters, OfferStatus } from "@/types/offer";
+import type { Note, Offer, OfferDetail, OfferFilters, OfferStatus } from "@/types/offer";
 
 const buildParams = (filters: OfferFilters) => {
   const params: Record<string, string | number> = {};
@@ -12,6 +12,7 @@ const buildParams = (filters: OfferFilters) => {
   if (filters.sort) params.sort = filters.sort;
   if (filters.page) params.page = filters.page;
   if (filters.per_page) params.per_page = filters.per_page;
+  if (filters.include_archived) params.include_archived = "true";
   return params;
 };
 
@@ -32,9 +33,18 @@ export const listOffers = async (filters: OfferFilters = {}): Promise<OffersResp
   };
 };
 
-export const getOffer = async (id: number): Promise<Offer> => {
-  const res = await api.get<Offer>(`/offers/${id}`);
+export const getOffer = async (id: number): Promise<OfferDetail> => {
+  const res = await api.get<OfferDetail>(`/offers/${id}`);
   return res.data;
+};
+
+export const createNote = async (offerId: number, content: string): Promise<Note> => {
+  const res = await api.post<Note>(`/offers/${offerId}/notes`, { content });
+  return res.data;
+};
+
+export const deleteNote = async (offerId: number, noteId: number): Promise<void> => {
+  await api.delete(`/offers/${offerId}/notes/${noteId}`);
 };
 
 export const createOffer = async (data: Partial<Offer>): Promise<Offer> => {

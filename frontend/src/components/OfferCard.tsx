@@ -21,9 +21,10 @@ const MatchDots = ({ score }: { score: number | null }) => {
 interface Props {
   offer: Offer;
   onEdit?: (offer: Offer) => void;
+  onOpen?: (offer: Offer) => void;
 }
 
-export const OfferCard = ({ offer, onEdit }: Props) => {
+export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const archiveMut = useArchiveOffer();
   const statusMut = useChangeStatus();
@@ -44,7 +45,15 @@ export const OfferCard = ({ offer, onEdit }: Props) => {
       <header className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-semibold text-brand-dark">
-            {offer.url ? (
+            {onOpen ? (
+              <button
+                type="button"
+                onClick={() => onOpen(offer)}
+                className="text-left hover:text-brand-accent"
+              >
+                {offer.title}
+              </button>
+            ) : offer.url ? (
               <a
                 href={offer.url}
                 target="_blank"

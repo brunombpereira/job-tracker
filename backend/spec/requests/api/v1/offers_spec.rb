@@ -31,6 +31,14 @@ RSpec.describe "Api::V1::Offers", type: :request do
       expect(body.size).to eq(3)
     end
 
+    it "includes archived offers when include_archived=true" do
+      create(:offer, :archived)
+      get "/api/v1/offers", params: { include_archived: "true" }
+
+      body = JSON.parse(response.body)
+      expect(body.size).to eq(4)
+    end
+
     describe "filtering" do
       it "filters by single status" do
         create(:offer, :applied)

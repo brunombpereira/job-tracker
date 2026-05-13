@@ -4,8 +4,10 @@ module Api
       before_action :set_offer, only: %i[show update destroy status]
 
       # GET /api/v1/offers
+      # Query params: include_archived=true to see archived offers in results.
       def index
-        scope = Offer.includes(:source).active
+        scope = Offer.includes(:source)
+        scope = scope.active unless params[:include_archived] == "true"
         scope = apply_filters(scope)
         scope = apply_sort(scope)
 
@@ -18,9 +20,16 @@ module Api
         render json: offers.as_json(include: :source)
       end
 
-      # GET /api/v1/offers/:id
+      # GET /api/v1/offers/:id — includes source, notes (newest first),
+      # status_changes (chronological)
       def show
-        render json: @offer.as_json(include: %i[source notes status_changes])
+        render json: @offer.as_json(
+          include: {
+            source:         {},
+            notes:          { only: %i[id content created_at] },
+            status_changes: { only: %i[id from_status to_status reason created_at] }
+          }
+        )
       end
 
       # POST /api/v1/offers
