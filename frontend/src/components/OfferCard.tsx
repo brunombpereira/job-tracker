@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { Offer, OfferModality, OfferStatus } from "@/types/offer";
 import { STATUS_TRANSITIONS } from "@/types/offer";
 import { StatusBadge } from "./StatusBadge";
+import { useConfirm } from "./ConfirmDialog";
 import { useArchiveOffer, useChangeStatus } from "@/hooks/useOffers";
 
 const MODALITY_ICON: Record<OfferModality, string> = {
@@ -48,10 +49,25 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const archiveMut = useArchiveOffer();
   const statusMut = useChangeStatus();
+  const confirm = useConfirm();
   const allowed = STATUS_TRANSITIONS[offer.status] ?? [];
 
-  const onArchive = () => {
-    if (!confirm(`Arquivar "${offer.title}"?`)) return;
+  const onArchive = async () => {
+    const ok = await confirm({
+      title: "Arquivar oferta",
+      message: (
+        <>
+          Tens a certeza que queres arquivar{" "}
+          <span className="font-medium text-ink">&ldquo;{offer.title}&rdquo;</span>?
+          Fica fora da lista activa mas o URL fica guardado — descartadas
+          não voltam a aparecer em pesquisas futuras.
+        </>
+      ),
+      confirmLabel: "Arquivar",
+      cancelLabel: "Cancelar",
+      tone: "danger",
+    });
+    if (!ok) return;
     archiveMut.mutate(offer.id);
   };
 
