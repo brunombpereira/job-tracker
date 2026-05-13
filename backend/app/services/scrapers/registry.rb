@@ -77,6 +77,13 @@ module Scrapers
         color: "#e07a5f",
         default_params: {},
         env_required: []
+      ),
+      Source.new(
+        key: "linkedin", display_name: "LinkedIn", tag: "HTML",
+        client_class_name: "Scrapers::LinkedinGuestClient",
+        color: "#0a66c2",
+        default_params: { keywords: "junior developer", location: "Portugal", time: "week" },
+        env_required: []
       )
     ].freeze
 

@@ -60,3 +60,14 @@ teamlyzer_daily:
   args:
     - "teamlyzer"
     - {}
+
+linkedin_daily:
+  cron: "30 6 * * *"
+  class: ScraperRunJob
+  queue: scrapers
+  description: "LinkedIn · guest jobs API (junior PT, past week)"
+  args:
+    - "linkedin"
+    - keywords: "junior developer"
+      location: "Portugal"
+      time: "week"
