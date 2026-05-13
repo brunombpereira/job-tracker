@@ -11,6 +11,7 @@ import { Modal } from "@/components/Modal";
 import { OfferForm } from "@/components/OfferForm";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { OfferDetail } from "@/components/OfferDetail";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import type { Offer, OfferFilters } from "@/types/offer";
 
 const SORT_OPTIONS = [
@@ -81,24 +82,24 @@ export const OffersList = () => {
   const hasActiveFilters = activeFilterCount > 0 || Boolean(filters.search);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
+    <div className="min-h-screen bg-surface">
+      <header className="border-b border-edge bg-surface-raised">
         <div className="container mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4">
           <div>
-            <h1 className="text-xl font-bold text-brand">JobTracker</h1>
-            <p className="hidden text-xs text-slate-500 sm:block">
+            <h1 className="font-serif text-2xl text-ink">JobTracker</h1>
+            <p className="hidden text-xs text-ink-muted sm:block">
               Gerir candidaturas a empregos · brunombpereira/job-tracker
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="inline-flex rounded border border-slate-300 bg-slate-50 p-0.5 text-xs font-medium">
+            <div className="inline-flex rounded-lg border border-edge bg-surface p-0.5 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setView("list")}
-                className={`rounded px-3 py-1 transition ${
+                className={`rounded-md px-3 py-1 transition ${
                   view === "list"
-                    ? "bg-white text-brand shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-surface-raised text-ink shadow-soft"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 Lista
@@ -106,10 +107,10 @@ export const OffersList = () => {
               <button
                 type="button"
                 onClick={() => setView("kanban")}
-                className={`rounded px-3 py-1 transition ${
+                className={`rounded-md px-3 py-1 transition ${
                   view === "kanban"
-                    ? "bg-white text-brand shadow-sm"
-                    : "text-slate-500 hover:text-slate-800"
+                    ? "bg-surface-raised text-ink shadow-soft"
+                    : "text-ink-muted hover:text-ink"
                 }`}
               >
                 Kanban
@@ -118,10 +119,11 @@ export const OffersList = () => {
             <button
               type="button"
               onClick={openCreate}
-              className="rounded bg-brand-accent px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand"
+              className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep"
             >
               + Nova oferta
             </button>
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -133,21 +135,21 @@ export const OffersList = () => {
             placeholder="Pesquisar título, empresa ou descrição..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="flex-1 rounded border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-accent focus:outline-none"
+            className="flex-1 rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm text-ink placeholder:text-ink-muted shadow-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
           />
           <div className="flex gap-2">
             {/* Mobile filters toggle */}
             <button
               type="button"
               onClick={() => setMobileFiltersOpen(true)}
-              className="md:hidden rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="md:hidden rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm font-medium text-ink-soft shadow-soft transition hover:bg-surface-sunken"
             >
               Filtros{activeFilterCount > 0 && ` · ${activeFilterCount}`}
             </button>
             <select
               value={filters.sort ?? "match_score:desc"}
               onChange={(e) => setFilters({ ...filters, sort: e.target.value, page: 1 })}
-              className="rounded border border-slate-300 bg-white px-3 py-2 text-sm focus:border-brand-accent focus:outline-none"
+              className="rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm text-ink shadow-soft focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -165,12 +167,12 @@ export const OffersList = () => {
           </div>
 
           <section>
-            <div className="mb-3 flex items-center justify-between text-sm text-slate-600">
+            <div className="mb-3 flex items-center justify-between text-sm text-ink-soft">
               <span>
-                <strong className="text-slate-900">{total}</strong>{" "}
+                <strong className="text-ink">{total}</strong>{" "}
                 {total === 1 ? "oferta" : "ofertas"}
                 {isFetching && !isLoading && (
-                  <span className="ml-2 text-xs text-slate-400">a atualizar…</span>
+                  <span className="ml-2 text-xs text-ink-muted">a atualizar…</span>
                 )}
               </span>
             </div>
@@ -243,18 +245,18 @@ export const OffersList = () => {
           aria-label="Filtros"
         >
           <div
-            className="absolute inset-0 bg-slate-900/50"
+            className="absolute inset-0 bg-ink/40"
             onClick={() => setMobileFiltersOpen(false)}
             role="presentation"
           />
-          <div className="absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto bg-slate-50 p-4 shadow-xl">
+          <div className="absolute inset-y-0 right-0 w-[85%] max-w-sm overflow-y-auto bg-surface p-4 shadow-xl">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-900">Filtros</h2>
+              <h2 className="text-base font-semibold text-ink">Filtros</h2>
               <button
                 type="button"
                 onClick={() => setMobileFiltersOpen(false)}
                 aria-label="Fechar filtros"
-                className="rounded p-1 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
+                className="rounded p-1 text-ink-muted transition hover:bg-edge hover:text-ink-soft"
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
@@ -265,7 +267,7 @@ export const OffersList = () => {
             <button
               type="button"
               onClick={() => setMobileFiltersOpen(false)}
-              className="mt-4 w-full rounded bg-brand-accent px-3 py-2 text-sm font-medium text-white"
+              className="mt-4 w-full rounded bg-accent px-3 py-2 text-sm font-medium text-white"
             >
               Ver {total} ofertas
             </button>

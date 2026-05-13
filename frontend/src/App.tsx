@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { OffersList } from "@/pages/OffersList";
 import { Search } from "@/pages/Search";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Tab = "offers" | "search";
 
@@ -26,16 +27,19 @@ export default function App() {
 
   if (tab === "search") {
     return (
-      <div className="min-h-screen bg-slate-50">
-        <header className="border-b border-slate-200 bg-white">
+      <div className="min-h-screen bg-surface">
+        <header className="border-b border-edge bg-surface-raised">
           <div className="container mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
             <div>
-              <h1 className="text-xl font-bold text-brand">JobTracker</h1>
-              <p className="hidden text-xs text-slate-500 sm:block">
+              <h1 className="font-serif text-2xl text-ink">JobTracker</h1>
+              <p className="hidden text-xs text-ink-muted sm:block">
                 Procura automática de ofertas
               </p>
             </div>
-            <TabSwitch tab={tab} onChange={setTab} />
+            <div className="flex items-center gap-2">
+              <TabSwitch tab={tab} onChange={setTab} />
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <main className="container mx-auto max-w-7xl px-4 py-6">
@@ -56,7 +60,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setTab("search")}
-          className="rounded-full bg-brand-accent px-4 py-2 text-sm font-medium text-white shadow-lg"
+          className="rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white shadow-raise transition hover:bg-accent-deep"
         >
           🔎 Procurar
         </button>
@@ -65,7 +69,7 @@ export default function App() {
         <button
           type="button"
           onClick={() => setTab("search")}
-          className="rounded-full bg-white px-4 py-2 text-sm font-medium text-brand shadow-lg ring-1 ring-slate-200 transition hover:bg-slate-50"
+          className="rounded-full border border-edge bg-surface-raised px-5 py-2.5 text-sm font-medium text-ink shadow-raise transition hover:border-accent hover:text-accent"
         >
           🔎 Procurar ofertas
         </button>
@@ -76,14 +80,14 @@ export default function App() {
 
 function TabSwitch({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
   return (
-    <div className="inline-flex rounded border border-slate-300 bg-slate-50 p-0.5 text-xs font-medium">
+    <div className="inline-flex rounded border border-edge-strong bg-surface p-0.5 text-xs font-medium">
       <button
         type="button"
         onClick={() => onChange("offers")}
         className={`rounded px-3 py-1 transition ${
           tab === "offers"
-            ? "bg-white text-brand shadow-sm"
-            : "text-slate-500 hover:text-slate-800"
+            ? "bg-surface-raised text-ink shadow-sm"
+            : "text-ink-muted hover:text-ink"
         }`}
       >
         Ofertas
@@ -93,8 +97,8 @@ function TabSwitch({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) 
         onClick={() => onChange("search")}
         className={`rounded px-3 py-1 transition ${
           tab === "search"
-            ? "bg-white text-brand shadow-sm"
-            : "text-slate-500 hover:text-slate-800"
+            ? "bg-surface-raised text-ink shadow-sm"
+            : "text-ink-muted hover:text-ink"
         }`}
       >
         Procurar

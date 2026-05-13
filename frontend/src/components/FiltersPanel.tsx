@@ -44,14 +44,14 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
     (filters.include_archived ? 1 : 0);
 
   return (
-    <aside className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 text-sm">
+    <aside className="space-y-5 rounded-xl border border-edge bg-surface-raised p-5 text-sm shadow-soft">
       <header className="flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Filtros</h3>
+        <h3 className="font-serif text-base text-ink">Filtros</h3>
         {activeCount > 0 && (
           <button
             type="button"
             onClick={clearAll}
-            className="text-xs text-slate-500 underline-offset-2 hover:text-brand-accent hover:underline"
+            className="text-xs text-ink-muted underline-offset-2 hover:text-accent hover:underline"
           >
             Limpar ({activeCount})
           </button>
@@ -59,7 +59,7 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
       </header>
 
       <section>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Status
         </h4>
         <div className="flex flex-wrap gap-1.5">
@@ -72,8 +72,8 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
                 onClick={() => toggleStatus(s)}
                 className={`rounded-full border px-2.5 py-0.5 text-xs font-medium uppercase tracking-wide transition ${
                   active
-                    ? "border-brand-accent bg-brand-accent text-white"
-                    : "border-slate-300 bg-white text-slate-600 hover:border-brand-accent"
+                    ? "border-accent bg-accent text-white"
+                    : "border-edge-strong bg-surface-raised text-ink-soft hover:border-accent"
                 }`}
               >
                 {s}
@@ -84,13 +84,13 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
       </section>
 
       <section>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Modalidade
         </h4>
         <select
           value={filters.modality ?? ""}
           onChange={(e) => setModality(e.target.value)}
-          className="block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+          className="block w-full rounded-lg border border-edge-strong bg-surface-raised px-2.5 py-1.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
         >
           <option value="">Todas</option>
           {MODALITY_VALUES.map((m) => (
@@ -102,7 +102,7 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
       </section>
 
       <section>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Match score
         </h4>
         <div className="flex items-center gap-2">
@@ -113,9 +113,9 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
             placeholder="min"
             value={filters.match_score_gte ?? ""}
             onChange={(e) => setMatch("match_score_gte")(e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-edge-strong bg-surface-raised px-2.5 py-1.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
           />
-          <span className="text-slate-400">–</span>
+          <span className="text-ink-muted">–</span>
           <input
             type="number"
             min={1}
@@ -123,13 +123,13 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
             placeholder="max"
             value={filters.match_score_lte ?? ""}
             onChange={(e) => setMatch("match_score_lte")(e.target.value)}
-            className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-edge-strong bg-surface-raised px-2.5 py-1.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
           />
         </div>
       </section>
 
       <section>
-        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
           Localização
         </h4>
         <input
@@ -137,17 +137,17 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
           placeholder="ex.: Porto"
           value={filters.location ?? ""}
           onChange={(e) => setLocation(e.target.value)}
-          className="block w-full rounded border border-slate-300 px-2 py-1.5 text-sm"
+          className="block w-full rounded-lg border border-edge-strong bg-surface-raised px-2.5 py-1.5 text-sm text-ink focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft"
         />
       </section>
 
-      <section className="border-t border-slate-100 pt-3">
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-700">
+      <section className="border-t border-edge pt-3">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink-soft">
           <input
             type="checkbox"
             checked={Boolean(filters.include_archived)}
             onChange={(e) => setArchived(e.target.checked)}
-            className="h-3.5 w-3.5 rounded border-slate-300 text-brand-accent focus:ring-brand-accent"
+            className="h-3.5 w-3.5 rounded border-edge-strong text-accent focus:ring-accent"
           />
           Mostrar arquivadas
         </label>

@@ -2,13 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens. Light first; .dark on <html> swaps the entire palette
+   without re-rendering React or duplicating Tailwind classes. */
 @layer base {
-  html {
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    color: #1a2733;
-    background-color: #f8fafc;
+  :root {
+    --surface: 250 250 249;        /* stone-50  */
+    --surface-raised: 255 255 255;
+    --surface-sunken: 245 245 244; /* stone-100 */
+
+    --ink: 28 25 23;               /* stone-900 */
+    --ink-soft: 87 83 78;          /* stone-600 */
+    --ink-muted: 168 162 158;      /* stone-400 */
+
+    --edge: 231 229 228;           /* stone-200 */
+    --edge-strong: 214 211 209;    /* stone-300 */
+
+    --accent: 234 88 12;           /* orange-600 */
+    --accent-soft: 254 215 170;    /* orange-200 */
+    --accent-ghost: 255 247 237;   /* orange-50  */
+    --accent-deep: 154 52 18;      /* orange-800 */
   }
+
+  .dark {
+    --surface: 28 25 23;           /* stone-900 — page */
+    --surface-raised: 41 37 36;    /* stone-800 — cards */
+    --surface-sunken: 68 64 60;    /* stone-700 — hover lift */
+
+    --ink: 245 245 244;            /* stone-100 */
+    --ink-soft: 168 162 158;       /* stone-400 */
+    --ink-muted: 120 113 108;      /* stone-500 */
+
+    --edge: 68 64 60;              /* stone-700 */
+    --edge-strong: 87 83 78;       /* stone-600 */
+
+    --accent: 251 146 60;          /* orange-400 — boost against dark bg */
+    --accent-soft: 124 45 18;      /* orange-900 muted bg */
+    --accent-ghost: 41 37 36;      /* close to surface-raised */
+    --accent-deep: 254 215 170;    /* light text on dark accent bg */
+  }
+
+  html {
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    background-color: rgb(var(--surface));
+    color: rgb(var(--ink));
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+  }
+
   body {
     @apply min-h-screen;
+  }
+
+  h1, h2, .font-serif {
+    font-family: "Source Serif 4", ui-serif, Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 }

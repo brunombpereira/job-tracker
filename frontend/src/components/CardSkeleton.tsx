@@ -1,15 +1,15 @@
 export const CardSkeleton = () => (
-  <div className="animate-pulse rounded-lg border border-slate-200 bg-white p-4">
-    <div className="mb-2 h-4 w-3/4 rounded bg-slate-200" />
-    <div className="mb-3 h-3 w-1/2 rounded bg-slate-100" />
+  <div className="animate-pulse rounded-lg border border-edge bg-surface-raised p-4">
+    <div className="mb-2 h-4 w-3/4 rounded bg-edge" />
+    <div className="mb-3 h-3 w-1/2 rounded bg-surface-sunken" />
     <div className="mb-3 flex gap-1">
-      <span className="h-4 w-12 rounded bg-slate-100" />
-      <span className="h-4 w-12 rounded bg-slate-100" />
-      <span className="h-4 w-12 rounded bg-slate-100" />
+      <span className="h-4 w-12 rounded bg-surface-sunken" />
+      <span className="h-4 w-12 rounded bg-surface-sunken" />
+      <span className="h-4 w-12 rounded bg-surface-sunken" />
     </div>
     <div className="flex justify-between">
-      <span className="h-3 w-16 rounded bg-slate-100" />
-      <span className="h-3 w-20 rounded bg-slate-100" />
+      <span className="h-3 w-16 rounded bg-surface-sunken" />
+      <span className="h-3 w-20 rounded bg-surface-sunken" />
     </div>
   </div>
 );

@@ -11,7 +11,7 @@ const MatchDots = ({ score }: { score: number | null }) => {
       {Array.from({ length: 5 }, (_, i) => (
         <span
           key={i}
-          className={`h-2 w-2 rounded-sm ${i < filled ? "bg-brand-accent" : "bg-slate-200"}`}
+          className={`h-2 w-2 rounded-sm ${i < filled ? "bg-accent" : "bg-edge"}`}
         />
       ))}
     </div>
@@ -41,15 +41,15 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
   };
 
   return (
-    <article className="group rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-      <header className="flex items-start justify-between gap-2">
+    <article className="group rounded-xl border border-edge bg-surface-raised p-5 shadow-soft transition hover:shadow-raise">
+      <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-brand-dark">
+          <h3 className="truncate font-serif text-base text-ink">
             {onOpen ? (
               <button
                 type="button"
                 onClick={() => onOpen(offer)}
-                className="text-left hover:text-brand-accent"
+                className="text-left hover:text-accent"
               >
                 {offer.title}
               </button>
@@ -58,7 +58,7 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
                 href={offer.url}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="hover:text-brand-accent"
+                className="hover:text-accent"
               >
                 {offer.title}
               </a>
@@ -66,34 +66,34 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
               offer.title
             )}
           </h3>
-          <p className="truncate text-sm text-slate-600">
-            {offer.company}
-            {offer.location && <span className="text-slate-400"> · {offer.location}</span>}
-            {offer.modality && <span className="text-slate-400"> · {offer.modality}</span>}
+          <p className="mt-0.5 truncate text-sm text-ink-soft">
+            <span className="font-medium">{offer.company}</span>
+            {offer.location && <span className="text-ink-muted"> · {offer.location}</span>}
+            {offer.modality && <span className="text-ink-muted"> · {offer.modality}</span>}
           </p>
         </div>
         <StatusBadge status={offer.status} />
       </header>
 
       {offer.stack.length > 0 && (
-        <ul className="mt-2 flex flex-wrap gap-1">
+        <ul className="mt-3 flex flex-wrap gap-1">
           {offer.stack.slice(0, 6).map((tech) => (
             <li
               key={tech}
-              className="rounded bg-indigo-50 px-1.5 py-0.5 text-xs text-indigo-700"
+              className="rounded-md bg-accent-ghost px-2 py-0.5 text-xs text-accent-deep dark:bg-accent-soft/30"
             >
               {tech}
             </li>
           ))}
           {offer.stack.length > 6 && (
-            <li className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-500">
+            <li className="rounded-md bg-surface-sunken px-2 py-0.5 text-xs text-ink-muted">
               +{offer.stack.length - 6}
             </li>
           )}
         </ul>
       )}
 
-      <footer className="mt-3 flex items-center justify-between text-xs text-slate-500">
+      <footer className="mt-4 flex items-center justify-between text-xs text-ink-muted">
         <div className="flex items-center gap-3">
           <MatchDots score={offer.match_score} />
           <span>{offer.found_date}</span>
@@ -105,7 +105,7 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
               <button
                 type="button"
                 onClick={() => setStatusMenuOpen((v) => !v)}
-                className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                className="rounded p-1 text-ink-muted hover:bg-surface-sunken hover:text-ink-soft"
                 title="Mudar status"
                 aria-label="Mudar status"
               >
@@ -120,13 +120,13 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
                     onClick={() => setStatusMenuOpen(false)}
                     role="presentation"
                   />
-                  <ul className="absolute right-0 z-20 mt-1 w-36 rounded-md border border-slate-200 bg-white py-1 shadow-lg">
+                  <ul className="absolute right-0 z-20 mt-1 w-36 rounded-md border border-edge bg-surface-raised py-1 shadow-lg">
                     {allowed.map((s) => (
                       <li key={s}>
                         <button
                           type="button"
                           onClick={() => onTransition(s)}
-                          className="block w-full px-3 py-1 text-left text-sm capitalize text-slate-700 transition hover:bg-slate-50"
+                          className="block w-full px-3 py-1 text-left text-sm capitalize text-ink-soft transition hover:bg-surface"
                         >
                           → {s}
                         </button>
@@ -141,7 +141,7 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
             <button
               type="button"
               onClick={() => onEdit(offer)}
-              className="rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+              className="rounded p-1 text-ink-muted hover:bg-surface-sunken hover:text-ink-soft"
               title="Editar"
               aria-label="Editar oferta"
             >
@@ -154,7 +154,7 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
             type="button"
             onClick={onArchive}
             disabled={archiveMut.isPending}
-            className="rounded p-1 text-slate-500 hover:bg-rose-100 hover:text-rose-600 disabled:opacity-40"
+            className="rounded p-1 text-ink-muted hover:bg-rose-100 hover:text-rose-600 disabled:opacity-40"
             title="Arquivar"
             aria-label="Arquivar oferta"
           >

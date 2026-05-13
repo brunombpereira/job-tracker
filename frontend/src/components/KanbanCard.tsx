@@ -32,33 +32,33 @@ export const KanbanCard = ({ offer, onClick }: Props) => {
           onClick?.(offer);
         }
       }}
-      className="cursor-grab rounded-md border border-slate-200 bg-white p-3 shadow-sm transition hover:shadow active:cursor-grabbing"
+      className="cursor-grab rounded-lg border border-edge bg-surface-raised p-3 shadow-soft transition hover:shadow-raise active:cursor-grabbing"
     >
-      <h4 className="truncate text-sm font-semibold text-brand-dark">{offer.title}</h4>
-      <p className="truncate text-xs text-slate-600">
-        {offer.company}
-        {offer.location && <span className="text-slate-400"> · {offer.location}</span>}
+      <h4 className="truncate font-serif text-sm text-ink">{offer.title}</h4>
+      <p className="mt-0.5 truncate text-xs text-ink-soft">
+        <span className="font-medium">{offer.company}</span>
+        {offer.location && <span className="text-ink-muted"> · {offer.location}</span>}
       </p>
       {offer.stack.length > 0 && (
         <ul className="mt-2 flex flex-wrap gap-1">
           {offer.stack.slice(0, 3).map((tech) => (
             <li
               key={tech}
-              className="rounded bg-indigo-50 px-1.5 py-0.5 text-[10px] text-indigo-700"
+              className="rounded-md bg-accent-ghost px-1.5 py-0.5 text-[10px] text-accent-deep dark:bg-accent-soft/30"
             >
               {tech}
             </li>
           ))}
           {offer.stack.length > 3 && (
-            <li className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
+            <li className="rounded-md bg-surface-sunken px-1.5 py-0.5 text-[10px] text-ink-muted">
               +{offer.stack.length - 3}
             </li>
           )}
         </ul>
       )}
-      <footer className="mt-2 flex items-center justify-between text-[10px] text-slate-500">
+      <footer className="mt-3 flex items-center justify-between text-[10px] text-ink-muted">
         {offer.match_score && (
-          <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-800">
+          <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
             ★ {offer.match_score}/5
           </span>
         )}

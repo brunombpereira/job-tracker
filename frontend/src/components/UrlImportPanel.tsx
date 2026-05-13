@@ -36,13 +36,13 @@ export const UrlImportPanel = () => {
   };
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4">
-      <h3 className="text-sm font-semibold text-slate-900">
+    <section className="rounded-lg border border-edge bg-surface-raised p-4">
+      <h3 className="text-sm font-semibold text-ink">
         Importar de um URL
       </h3>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="mt-1 text-xs text-ink-muted">
         Cola o link de uma oferta no LinkedIn, Indeed, Glassdoor, ou qualquer página de
-        emprego com <code className="rounded bg-slate-100 px-1">JobPosting</code> JSON-LD.
+        emprego com <code className="rounded bg-surface-sunken px-1">JobPosting</code> JSON-LD.
         Lemos a meta uma vez e criamos a entry.
       </p>
 
@@ -53,13 +53,13 @@ export const UrlImportPanel = () => {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://www.linkedin.com/jobs/view/…"
-          className="block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none focus:ring-1 focus:ring-brand-accent"
+          className="block w-full rounded border border-edge-strong px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           disabled={mutation.isPending}
         />
         <button
           type="submit"
           disabled={mutation.isPending || !url.trim()}
-          className="inline-flex items-center justify-center rounded bg-brand-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded bg-accent px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-accent-deep disabled:cursor-not-allowed disabled:opacity-50"
         >
           {mutation.isPending ? "A importar…" : "Importar"}
         </button>

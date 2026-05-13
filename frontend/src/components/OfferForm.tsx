@@ -114,12 +114,12 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
   };
 
   const baseInput =
-    "block w-full rounded border px-3 py-2 text-sm focus:outline-none transition";
+    "block w-full rounded-lg border bg-surface-raised px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:ring-2 transition";
   const inputClass = (name: string) =>
     `${baseInput} ${
       fieldError(name)
-        ? "border-rose-400 focus:border-rose-500"
-        : "border-slate-300 focus:border-brand-accent"
+        ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200"
+        : "border-edge-strong focus:border-accent focus:ring-accent-soft"
     }`;
 
   const FieldError = ({ name }: { name: string }) => {
@@ -131,27 +131,27 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
   return (
     <form onSubmit={onSubmit} className="space-y-3">
       {error && (
-        <div className="rounded bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div>
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{error}</div>
       )}
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Title *</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Title *</span>
           <input value={form.title} onChange={set("title")} required className={inputClass("title")} />
           <FieldError name="title" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Company *</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Company *</span>
           <input value={form.company} onChange={set("company")} required className={inputClass("company")} />
           <FieldError name="company" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Location</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Location</span>
           <input value={form.location} onChange={set("location")} className={inputClass("location")} />
           <FieldError name="location" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Modality</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Modality</span>
           <select value={form.modality} onChange={set("modality")} className={inputClass("modality")}>
             <option value="">—</option>
             {MODALITY_VALUES.map((m) => (
@@ -163,7 +163,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           <FieldError name="modality" />
         </label>
         <label className="block md:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-700">URL</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">URL</span>
           <input
             type="url"
             value={form.url}
@@ -174,7 +174,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           <FieldError name="url" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Status</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Status</span>
           <select value={form.status} onChange={set("status")} className={inputClass("status")}>
             {STATUS_VALUES.map((s) => (
               <option key={s} value={s}>
@@ -185,7 +185,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           <FieldError name="status" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Match score (1-5)</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Match score (1-5)</span>
           <input
             type="number"
             min={1}
@@ -197,7 +197,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           <FieldError name="match_score" />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Salary range</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Salary range</span>
           <input
             value={form.salary_range}
             onChange={set("salary_range")}
@@ -206,7 +206,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           />
         </label>
         <label className="block">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Company size</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Company size</span>
           <input
             value={form.company_size}
             onChange={set("company_size")}
@@ -215,7 +215,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-700">
+          <span className="mb-1 block text-xs font-medium text-ink-soft">
             Stack (comma-separated)
           </span>
           <input
@@ -226,7 +226,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
           />
         </label>
         <label className="block md:col-span-2">
-          <span className="mb-1 block text-xs font-medium text-slate-700">Description</span>
+          <span className="mb-1 block text-xs font-medium text-ink-soft">Description</span>
           <textarea
             value={form.description}
             onChange={set("description")}
@@ -236,18 +236,18 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
         </label>
       </div>
 
-      <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">
+      <div className="flex justify-end gap-2 border-t border-edge pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          className="rounded-lg border border-edge-strong px-4 py-2 text-sm font-medium text-ink-soft transition hover:bg-surface-sunken"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-brand-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-brand disabled:opacity-50"
+          className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep disabled:opacity-50"
         >
           {submitting ? "A gravar..." : offer ? "Atualizar oferta" : "Criar oferta"}
         </button>

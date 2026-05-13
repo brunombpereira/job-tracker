@@ -70,34 +70,34 @@ export const Modal = ({ open, onClose, title, children, maxWidth = "max-w-xl" }:
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 pt-12 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 pt-12 backdrop-blur-sm"
       onClick={onClose}
       role="presentation"
     >
       <div
         ref={dialogRef}
-        className={`w-full ${maxWidth} rounded-lg bg-white shadow-xl`}
+        className={`w-full ${maxWidth} rounded-2xl bg-surface-raised shadow-raise`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <header className="flex items-center justify-between border-b border-slate-200 px-5 py-3">
-          <h2 id="modal-title" className="text-lg font-semibold text-slate-900">
+        <header className="flex items-center justify-between border-b border-edge px-6 py-4">
+          <h2 id="modal-title" className="font-serif text-xl text-ink">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="rounded p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-md p-1.5 text-ink-muted transition hover:bg-surface-sunken hover:text-ink-soft"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
               <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
             </svg>
           </button>
         </header>
-        <div className="px-5 py-4">{children}</div>
+        <div className="px-6 py-5">{children}</div>
       </div>
     </div>
   );

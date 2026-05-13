@@ -109,7 +109,7 @@ export const KanbanBoard = ({ offers, onCardClick }: Props) => {
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
     >
-      <div className="flex gap-3 overflow-x-auto pb-4">
+      <div className="flex gap-4 overflow-x-auto pb-4 px-0.5">
         {COLUMNS.map((col) => {
           const isReceiving =
             draggingFrom !== null &&
