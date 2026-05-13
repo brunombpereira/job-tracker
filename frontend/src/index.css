@@ -60,6 +60,39 @@
   }
 }
 
+/* ConfirmDialog enter / exit animations. The provider toggles
+   confirm-{backdrop,dialog}-{enter,exit} classes around the elements;
+   the exit animation timing must stay in sync with EXIT_MS in
+   ConfirmDialog.tsx (180 ms). */
+@keyframes confirm-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes confirm-backdrop-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes confirm-dialog-in {
+  from { opacity: 0; transform: scale(0.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes confirm-dialog-out {
+  from { opacity: 1; transform: scale(1)    translateY(0); }
+  to   { opacity: 0; transform: scale(0.96) translateY(4px); }
+}
+
+.confirm-backdrop-enter { animation: confirm-backdrop-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.confirm-backdrop-exit  { animation: confirm-backdrop-out 180ms ease both; }
+.confirm-dialog-enter   { animation: confirm-dialog-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.confirm-dialog-exit    { animation: confirm-dialog-out 180ms ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .confirm-backdrop-enter,
+  .confirm-backdrop-exit,
+  .confirm-dialog-enter,
+  .confirm-dialog-exit { animation: none; }
+}
+
 /* Prose styling for the safe-HTML descriptions backend lets through.
    Kept minimal so it inherits page typography — only structural rules. */
 .offer-description p { margin-bottom: 0.75rem; }
