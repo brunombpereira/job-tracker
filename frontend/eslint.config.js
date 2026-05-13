@@ -5,13 +5,44 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 
+const browserGlobals = {
+  window: "readonly",
+  document: "readonly",
+  console: "readonly",
+  fetch: "readonly",
+  setTimeout: "readonly",
+  clearTimeout: "readonly",
+  setInterval: "readonly",
+  clearInterval: "readonly",
+  localStorage: "readonly",
+  sessionStorage: "readonly",
+  navigator: "readonly",
+  location: "readonly",
+  HTMLElement: "readonly",
+  HTMLInputElement: "readonly",
+  HTMLButtonElement: "readonly",
+  Event: "readonly",
+  KeyboardEvent: "readonly",
+  MouseEvent: "readonly",
+};
+
+const nodeGlobals = {
+  __dirname: "readonly",
+  __filename: "readonly",
+  process: "readonly",
+  module: "readonly",
+  require: "readonly",
+  Buffer: "readonly",
+};
+
 export default [
   js.configs.recommended,
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tsParser,
       parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } },
+      globals: browserGlobals,
     },
     plugins: { "@typescript-eslint": tsPlugin, "react-hooks": reactHooks, "react-refresh": reactRefresh },
     rules: {
@@ -20,5 +51,14 @@ export default [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
   },
-  { ignores: ["dist/", "node_modules/"] },
+  {
+    files: ["*.config.{ts,js}", "vite.config.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: { ecmaVersion: "latest", sourceType: "module" },
+      globals: nodeGlobals,
+    },
+    plugins: { "@typescript-eslint": tsPlugin },
+  },
+  { ignores: ["dist/", "node_modules/", "**/*.d.ts", "vite.config.d.ts", "vite.config.js"] },
 ];

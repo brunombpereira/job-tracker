@@ -6,6 +6,11 @@ dist-ssr
 .env.*
 !.env.example
 
+# TS / Vite build artifacts
+*.tsbuildinfo
+vite.config.d.ts
+vite.config.js
+
 # Editor / OS
 .DS_Store
 .idea/
