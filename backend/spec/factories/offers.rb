@@ -20,5 +20,10 @@ FactoryBot.define do
       match_score { 5 }
       stack { %w[Ruby Rails React PostgreSQL] }
     end
+
+    trait :archived do
+      archived { true }
+      status { "archived" }
+    end
   end
 end

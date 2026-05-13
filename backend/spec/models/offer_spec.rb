@@ -38,4 +38,68 @@ RSpec.describe Offer, type: :model do
       expect(described_class.active).to contain_exactly(active_offer)
     end
   end
+
+  describe "#transition_to!" do
+    let(:offer) { create(:offer, status: "new") }
+
+    it "allows new → interested" do
+      expect { offer.transition_to!("interested") }
+        .to change { offer.reload.status }.from("new").to("interested")
+    end
+
+    it "records a status_change with reason" do
+      offer.transition_to!("interested", reason: "Promising")
+      change = offer.status_changes.last
+      expect(change.from_status).to eq("new")
+      expect(change.to_status).to eq("interested")
+      expect(change.reason).to eq("Promising")
+    end
+
+    it "raises ArgumentError on invalid transition" do
+      expect { offer.transition_to!("interview") }
+        .to raise_error(ArgumentError, /cannot transition/)
+    end
+
+    it "raises ArgumentError on unknown status" do
+      expect { offer.transition_to!("magic") }
+        .to raise_error(ArgumentError, /unknown status/)
+    end
+
+    it "archives the offer when transitioning to archived" do
+      offer.transition_to!("archived")
+      offer.reload
+      expect(offer.status).to eq("archived")
+      expect(offer.archived).to eq(true)
+    end
+
+    it "allows new → applied (skip interested)" do
+      expect { offer.transition_to!("applied") }
+        .to change { offer.reload.status }.to("applied")
+    end
+
+    it "allows applied → interview → offer" do
+      offer.transition_to!("applied")
+      offer.transition_to!("interview")
+      expect { offer.transition_to!("offer") }
+        .to change { offer.reload.status }.to("offer")
+    end
+
+    it "does not allow offer → interview (backward)" do
+      offer.transition_to!("applied")
+      offer.transition_to!("interview")
+      offer.transition_to!("offer")
+      expect { offer.transition_to!("interview") }
+        .to raise_error(ArgumentError, /cannot transition/)
+    end
+
+    it "is atomic — does not save partial state on error" do
+      original = offer.status
+      begin
+        offer.transition_to!("magic")
+      rescue ArgumentError
+        # expected
+      end
+      expect(offer.reload.status).to eq(original)
+    end
+  end
 end
