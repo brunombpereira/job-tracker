@@ -39,9 +39,32 @@ export interface OfferFilters {
   status?: OfferStatus[];
   modality?: OfferModality;
   match_score_gte?: number;
+  match_score_lte?: number;
   location?: string;
   search?: string;
   sort?: string;
   page?: number;
   per_page?: number;
 }
+
+export const STATUS_VALUES: OfferStatus[] = [
+  "new",
+  "interested",
+  "applied",
+  "interview",
+  "offer",
+  "rejected",
+  "archived",
+];
+
+export const MODALITY_VALUES: OfferModality[] = ["presencial", "hibrido", "remoto"];
+
+export const STATUS_TRANSITIONS: Record<OfferStatus, OfferStatus[]> = {
+  new:        ["interested", "applied", "rejected", "archived"],
+  interested: ["applied", "rejected", "archived"],
+  applied:    ["interview", "rejected", "archived"],
+  interview:  ["offer", "rejected", "archived"],
+  offer:      ["rejected", "archived"],
+  rejected:   ["archived"],
+  archived:   [],
+};

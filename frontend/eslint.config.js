@@ -21,9 +21,15 @@ const browserGlobals = {
   HTMLElement: "readonly",
   HTMLInputElement: "readonly",
   HTMLButtonElement: "readonly",
+  HTMLDivElement: "readonly",
   Event: "readonly",
   KeyboardEvent: "readonly",
   MouseEvent: "readonly",
+  confirm: "readonly",
+  alert: "readonly",
+  prompt: "readonly",
+  URL: "readonly",
+  URLSearchParams: "readonly",
 };
 
 const nodeGlobals = {
@@ -48,7 +54,13 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      // Disable base no-unused-vars in favour of the TS-aware one — base
+      // flags TS type-position parameter names like `(filters: T) => void`.
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
     },
   },
   {

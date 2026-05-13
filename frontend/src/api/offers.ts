@@ -6,6 +6,7 @@ const buildParams = (filters: OfferFilters) => {
   if (filters.status?.length) params.status = filters.status.join(",");
   if (filters.modality) params.modality = filters.modality;
   if (filters.match_score_gte) params.match_score_gte = filters.match_score_gte;
+  if (filters.match_score_lte) params.match_score_lte = filters.match_score_lte;
   if (filters.location) params.location = filters.location;
   if (filters.search) params.search = filters.search;
   if (filters.sort) params.sort = filters.sort;
