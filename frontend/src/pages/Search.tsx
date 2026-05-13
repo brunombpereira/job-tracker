@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { SourceCard } from "@/components/SourceCard";
+import { UrlImportPanel } from "@/components/UrlImportPanel";
 import {
   useCreateBatch,
   useSearchBatch,
@@ -163,6 +164,9 @@ export const Search = () => {
           )}
         </section>
       )}
+
+      {/* Manual URL import (LinkedIn / Indeed / Glassdoor / any JobPosting page) */}
+      <UrlImportPanel />
 
       {/* History */}
       <section>

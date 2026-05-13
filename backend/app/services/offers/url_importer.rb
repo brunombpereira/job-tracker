@@ -1,0 +1,143 @@
+module Offers
+  # On-demand offer importer for sources we don't scrape in bulk (LinkedIn,
+  # Indeed, Glassdoor, individual company career pages). The user pastes a
+  # job-listing URL; we fetch it once with browser-like headers, extract
+  # schema.org/JobPosting JSON-LD (which Google needs for indexing and most
+  # major job boards therefore embed in SSR HTML), and create one Offer.
+  #
+  # Fall-back: if no JobPosting JSON-LD is present, the OpenGraph title +
+  # description seeds a minimal Offer so the user can edit by hand.
+  class UrlImporter
+    class ImportError < StandardError; end
+
+    USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " \
+                 "AppleWebKit/537.36 (KHTML, like Gecko) " \
+                 "Chrome/121.0.0.0 Safari/537.36"
+
+    def self.import(url)
+      new(url).import
+    end
+
+    def initialize(url)
+      @url = url.to_s.strip
+    end
+
+    def import
+      raise ImportError, "URL em branco" if @url.empty?
+      raise ImportError, "URL inválido" unless @url.match?(%r{\Ahttps?://})
+
+      if (existing = Offer.find_by(url: @url))
+        raise ImportError,
+              "Já existe (Oferta ##{existing.id}: \"#{existing.title}\")"
+      end
+
+      html  = fetch_html
+      attrs = extract_attrs(html)
+      raise ImportError, "Não encontrei JobPosting nem OpenGraph nesta página" if attrs.blank?
+
+      Offer.create!(attrs.merge(url: @url, status: "new"))
+    end
+
+    private
+
+    def fetch_html
+      res = Faraday.get(@url) do |r|
+        r.options.timeout = 20
+        r.options.open_timeout = 5
+        r.headers["User-Agent"]      = USER_AGENT
+        r.headers["Accept"]          = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        r.headers["Accept-Language"] = "en-US,en;q=0.9,pt;q=0.8"
+      end
+      raise ImportError, "HTTP #{res.status} de #{host}" unless res.success?
+      res.body
+    rescue Faraday::Error => e
+      raise ImportError, "Falha de rede: #{e.message}"
+    end
+
+    def extract_attrs(html)
+      doc = Nokogiri::HTML(html)
+      job_attrs_from_jsonld(doc) || og_fallback(doc)
+    end
+
+    def job_attrs_from_jsonld(doc)
+      doc.css('script[type="application/ld+json"]').each do |script|
+        parsed = safe_json(script.text)
+        candidates = parsed.is_a?(Array) ? parsed : [parsed]
+        candidates.each do |obj|
+          next unless obj.is_a?(Hash)
+          next unless job_posting?(obj)
+          return build_attrs(obj)
+        end
+      end
+      nil
+    end
+
+    def job_posting?(obj)
+      Array(obj["@type"] || obj["type"]).map(&:to_s).any? { |t| t.match?(/JobPosting/i) }
+    end
+
+    def build_attrs(obj)
+      {
+        title:       obj["title"].to_s.strip[0, 200].presence || "(sem título)",
+        company:     (obj.dig("hiringOrganization", "name") || host).to_s.strip[0, 200],
+        location:    extract_location(obj),
+        modality:    extract_modality(obj),
+        description: sanitize(obj["description"]),
+        posted_date: parse_date(obj["datePosted"])
+      }.compact
+    end
+
+    def extract_location(obj)
+      Array(obj["jobLocation"]).map do |loc|
+        addr = (loc.is_a?(Hash) ? loc["address"] : nil) || {}
+        next if addr.empty?
+        [addr["addressLocality"], addr["addressRegion"], addr["addressCountry"]]
+          .compact_blank.join(", ")
+      end.compact.uniq.first(2).join(" / ").presence
+    end
+
+    def extract_modality(obj)
+      type = Array(obj["jobLocationType"]).map(&:to_s).join(" ").upcase
+      return "remoto" if type.include?("TELECOMMUTE") || type.include?("REMOTE")
+      "presencial"
+    end
+
+    def og_fallback(doc)
+      title = meta(doc, 'meta[property="og:title"]')
+      return nil if title.blank?
+      {
+        title:       title[0, 200],
+        company:     host,
+        description: meta(doc, 'meta[property="og:description"]') ||
+                     meta(doc, 'meta[name="description"]')
+      }.compact
+    end
+
+    def meta(doc, selector)
+      doc.at_css(selector)&.[]("content")&.strip&.presence
+    end
+
+    def safe_json(s)
+      JSON.parse(s)
+    rescue JSON::ParserError
+      nil
+    end
+
+    def parse_date(s)
+      Date.parse(s.to_s)
+    rescue ArgumentError, TypeError
+      nil
+    end
+
+    def sanitize(html, max: 2000)
+      return nil if html.blank?
+      ActionView::Base.full_sanitizer.sanitize(html.to_s).strip[0, max]
+    end
+
+    def host
+      URI.parse(@url).host.to_s.sub(/\Awww\./, "")
+    rescue URI::InvalidURIError
+      "unknown"
+    end
+  end
+end

@@ -101,6 +101,18 @@ module Api
         }
       end
 
+      # POST /api/v1/offers/import_url
+      # Body: { url: "https://..." }
+      # Fetches the URL server-side, extracts schema.org/JobPosting JSON-LD
+      # (works for LinkedIn, Indeed, Glassdoor, and most ATSes), creates one
+      # Offer. Returns the created Offer (201) or a friendly error (422).
+      def import_url
+        offer = Offers::UrlImporter.import(params.require(:url))
+        render json: offer, status: :created
+      rescue Offers::UrlImporter::ImportError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
       # GET /api/v1/offers/export.csv  or  .xlsx
       def export
         scope = apply_filters(apply_sort(Offer.includes(:source).active))

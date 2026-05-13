@@ -23,6 +23,7 @@ Rails.application.routes.draw do
         end
         collection do
           post :import
+          post :import_url
           get :export, defaults: { format: :csv }
         end
         resources :notes, only: %i[create destroy]
