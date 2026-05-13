@@ -33,6 +33,9 @@ gem "caxlsx_rails"
 # Background jobs + scheduled scrapers
 gem "sidekiq", "~> 7.3"
 gem "sidekiq-cron", "~> 1.12"
+# Pinned: Sidekiq 7.3 calls TimedStack#pop with an argument, the signature
+# connection_pool dropped in 3.0. Stay on 2.x until Sidekiq 8.
+gem "connection_pool", "~> 2.5"
 
 # HTTP client + RSS parsing for scrapers
 gem "faraday", "~> 2.10"
