@@ -20,4 +20,12 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.force_ssl = ENV.fetch("RAILS_FORCE_SSL", "true") == "true"
+
+  # Allow Render's *.onrender.com hosts plus anything in the ALLOWED_HOSTS env
+  # var (CSV). Hosts blocking is a Rails 7+ security default.
+  config.hosts << /.*\.onrender\.com/
+  ENV.fetch("ALLOWED_HOSTS", "").split(",").map(&:strip).each do |h|
+    next if h.empty?
+    config.hosts << h
+  end
 end

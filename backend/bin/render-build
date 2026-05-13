@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Build script for Render web service. Runs once per deploy.
+set -euo pipefail
+
+echo "==> bundle install"
+bundle install
+
+echo "==> db migrate"
+bundle exec rails db:migrate
+
+echo "==> db seed (idempotent — skipped if data already present)"
+# Only seed if the offers table is empty (preserves user data between deploys)
+COUNT=$(bundle exec rails runner "puts Offer.count" 2>/dev/null || echo "0")
+if [ "$COUNT" = "0" ]; then
+    bundle exec rails db:seed
+else
+    echo "    skipping (offers table has $COUNT rows already)"
+fi
+
+echo "==> build complete"
