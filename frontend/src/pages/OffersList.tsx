@@ -8,7 +8,10 @@ import { EmptyState } from "@/components/EmptyState";
 import { CardSkeletonGrid } from "@/components/CardSkeleton";
 import { Modal } from "@/components/Modal";
 import { OfferForm } from "@/components/OfferForm";
+import { KanbanBoard } from "@/components/KanbanBoard";
 import type { Offer, OfferFilters } from "@/types/offer";
+
+type ViewMode = "list" | "kanban";
 
 const SORT_OPTIONS = [
   { value: "match_score:desc", label: "Match score (alto → baixo)" },
@@ -20,6 +23,7 @@ const SORT_OPTIONS = [
 ];
 
 export const OffersList = () => {
+  const [view, setView] = useState<ViewMode>("list");
   const [filters, setFilters] = useState<OfferFilters>({
     sort: "match_score:desc",
     per_page: 25,
@@ -37,7 +41,11 @@ export const OffersList = () => {
     );
   }, [debouncedSearch]);
 
-  const { data, isLoading, isFetching, error } = useOffers(filters);
+  // Kanban fetches all matching offers up to 200 — pagination doesn't fit a
+  // board view since the user is meant to see all columns at once.
+  const effectiveFilters: OfferFilters =
+    view === "kanban" ? { ...filters, per_page: 200, page: 1 } : filters;
+  const { data, isLoading, isFetching, error } = useOffers(effectiveFilters);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Offer | undefined>();
@@ -73,20 +81,42 @@ export const OffersList = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="container mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+        <div className="container mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4">
           <div>
             <h1 className="text-xl font-bold text-brand">JobTracker</h1>
             <p className="text-xs text-slate-500">
               Gerir candidaturas a empregos · brunombpereira/job-tracker
             </p>
           </div>
-          <button
-            type="button"
-            onClick={openCreate}
-            className="rounded bg-brand-accent px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand"
-          >
-            + Nova oferta
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded border border-slate-300 bg-slate-50 p-0.5 text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => setView("list")}
+                className={`rounded px-3 py-1 transition ${
+                  view === "list" ? "bg-white text-brand shadow-sm" : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Lista
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("kanban")}
+                className={`rounded px-3 py-1 transition ${
+                  view === "kanban" ? "bg-white text-brand shadow-sm" : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                Kanban
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={openCreate}
+              className="rounded bg-brand-accent px-3 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand"
+            >
+              + Nova oferta
+            </button>
+          </div>
         </div>
       </header>
 
@@ -145,7 +175,7 @@ export const OffersList = () => {
               />
             )}
 
-            {!isLoading && offers.length > 0 && (
+            {!isLoading && offers.length > 0 && view === "list" && (
               <>
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {offers.map((offer) => (
@@ -159,6 +189,10 @@ export const OffersList = () => {
                   onPageChange={(p) => setFilters((prev) => ({ ...prev, page: p }))}
                 />
               </>
+            )}
+
+            {!isLoading && offers.length > 0 && view === "kanban" && (
+              <KanbanBoard offers={offers} onCardClick={openEdit} />
             )}
           </section>
         </div>
