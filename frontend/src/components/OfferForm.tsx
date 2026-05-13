@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { Offer, OfferModality, OfferStatus } from "@/types/offer";
 import { MODALITY_VALUES, STATUS_VALUES } from "@/types/offer";
 import { useCreateOffer, useUpdateOffer } from "@/hooks/useOffers";
+import { describeError, fieldErrors } from "@/api/errors";
 
 interface Props {
   offer?: Offer;
@@ -58,6 +59,7 @@ const offerToForm = (offer: Offer): FormState => ({
 export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
   const [form, setForm] = useState<FormState>(offer ? offerToForm(offer) : empty);
   const [error, setError] = useState<string | null>(null);
+  const [errs, setErrs] = useState<Record<string, string[]>>({});
   const createMut = useCreateOffer();
   const updateMut = useUpdateOffer();
   const submitting = createMut.isPending || updateMut.isPending;
@@ -65,7 +67,10 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
   useEffect(() => {
     setForm(offer ? offerToForm(offer) : empty);
     setError(null);
+    setErrs({});
   }, [offer]);
+
+  const fieldError = (name: string) => errs[name]?.[0];
 
   const set =
     <K extends keyof FormState>(key: K) =>
@@ -75,6 +80,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrs({});
 
     const payload: Partial<Offer> = {
       title: form.title.trim(),
@@ -102,15 +108,25 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
       }
       onSaved();
     } catch (err) {
-      const msg =
-        (err as { response?: { data?: { errors?: unknown; error?: string } } }).response?.data
-          ?.error ?? "Falhou a gravar oferta.";
-      setError(String(msg));
+      setError(describeError(err));
+      setErrs(fieldErrors(err));
     }
   };
 
-  const inputClass =
-    "block w-full rounded border border-slate-300 px-3 py-2 text-sm focus:border-brand-accent focus:outline-none";
+  const baseInput =
+    "block w-full rounded border px-3 py-2 text-sm focus:outline-none transition";
+  const inputClass = (name: string) =>
+    `${baseInput} ${
+      fieldError(name)
+        ? "border-rose-400 focus:border-rose-500"
+        : "border-slate-300 focus:border-brand-accent"
+    }`;
+
+  const FieldError = ({ name }: { name: string }) => {
+    const msg = fieldError(name);
+    if (!msg) return null;
+    return <p className="mt-1 text-xs text-rose-600">{msg}</p>;
+  };
 
   return (
     <form onSubmit={onSubmit} className="space-y-3">
@@ -121,19 +137,22 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Title *</span>
-          <input value={form.title} onChange={set("title")} required className={inputClass} />
+          <input value={form.title} onChange={set("title")} required className={inputClass("title")} />
+          <FieldError name="title" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Company *</span>
-          <input value={form.company} onChange={set("company")} required className={inputClass} />
+          <input value={form.company} onChange={set("company")} required className={inputClass("company")} />
+          <FieldError name="company" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Location</span>
-          <input value={form.location} onChange={set("location")} className={inputClass} />
+          <input value={form.location} onChange={set("location")} className={inputClass("location")} />
+          <FieldError name="location" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Modality</span>
-          <select value={form.modality} onChange={set("modality")} className={inputClass}>
+          <select value={form.modality} onChange={set("modality")} className={inputClass("modality")}>
             <option value="">—</option>
             {MODALITY_VALUES.map((m) => (
               <option key={m} value={m}>
@@ -141,6 +160,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
               </option>
             ))}
           </select>
+          <FieldError name="modality" />
         </label>
         <label className="block md:col-span-2">
           <span className="mb-1 block text-xs font-medium text-slate-700">URL</span>
@@ -149,18 +169,20 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             value={form.url}
             onChange={set("url")}
             placeholder="https://..."
-            className={inputClass}
+            className={inputClass("url")}
           />
+          <FieldError name="url" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Status</span>
-          <select value={form.status} onChange={set("status")} className={inputClass}>
+          <select value={form.status} onChange={set("status")} className={inputClass("status")}>
             {STATUS_VALUES.map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>
             ))}
           </select>
+          <FieldError name="status" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Match score (1-5)</span>
@@ -170,8 +192,9 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             max={5}
             value={form.match_score}
             onChange={set("match_score")}
-            className={inputClass}
+            className={inputClass("match_score")}
           />
+          <FieldError name="match_score" />
         </label>
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-700">Salary range</span>
@@ -179,7 +202,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             value={form.salary_range}
             onChange={set("salary_range")}
             placeholder="e.g. €25k–€32k"
-            className={inputClass}
+            className={inputClass("salary_range")}
           />
         </label>
         <label className="block">
@@ -188,7 +211,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             value={form.company_size}
             onChange={set("company_size")}
             placeholder="e.g. 11-50"
-            className={inputClass}
+            className={inputClass("company_size")}
           />
         </label>
         <label className="block md:col-span-2">
@@ -199,7 +222,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             value={form.stack}
             onChange={set("stack")}
             placeholder="Ruby, Rails, React"
-            className={inputClass}
+            className={inputClass("stack")}
           />
         </label>
         <label className="block md:col-span-2">
@@ -208,7 +231,7 @@ export const OfferForm = ({ offer, onSaved, onCancel }: Props) => {
             value={form.description}
             onChange={set("description")}
             rows={4}
-            className={inputClass}
+            className={inputClass("description")}
           />
         </label>
       </div>
