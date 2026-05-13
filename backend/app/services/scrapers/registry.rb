@@ -68,7 +68,11 @@ module Scrapers
         key: "net_empregos", display_name: "Net-Empregos", tag: "RSS",
         client_class_name: "Scrapers::NetEmpregosClient",
         color: "#1d3557",
-        default_params: { category: "Programação" },
+        # "Informática" matches all four sub-categories (Programação,
+        # Análise, Gestão de Redes, Web/Multimédia) — broader net so
+        # adjacent tech roles also land in the inbox and get ranked by
+        # ProfileMatcher.
+        default_params: { category: "Informática" },
         env_required: []
       ),
       Source.new(

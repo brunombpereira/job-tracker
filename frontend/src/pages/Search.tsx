@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SourceCard } from "@/components/SourceCard";
 import { UrlImportPanel } from "@/components/UrlImportPanel";
 import { WipeOffersButton } from "@/components/WipeOffersButton";
+import { ManualPlatforms } from "@/components/ManualPlatforms";
 import {
   useCreateBatch,
   useSearchBatch,
@@ -168,6 +169,10 @@ export const Search = () => {
           )}
         </section>
       )}
+
+      {/* Manual platform browse — Cloudflare-locked sources you visit
+          by hand, then paste the offer URL into the importer below. */}
+      <ManualPlatforms />
 
       {/* Manual URL import (LinkedIn / Indeed / Glassdoor / any JobPosting page) */}
       <UrlImportPanel />

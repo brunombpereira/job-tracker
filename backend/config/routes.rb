@@ -34,6 +34,11 @@ Rails.application.routes.draw do
       resources :search_batches, only: %i[index create show]
       resources :sources, only: %i[index]
 
+      # Personal CV + cover letter served from storage/profile/.
+      get "profile/files",         to: "profile#files"
+      get "profile/cv",            to: "profile#cv"
+      get "profile/cover_letter",  to: "profile#cover_letter"
+
       get "stats", to: "stats#index"
     end
   end

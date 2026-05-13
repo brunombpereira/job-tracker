@@ -1,27 +1,43 @@
 require "rails_helper"
 
 RSpec.describe "DELETE /api/v1/offers/destroy_all", type: :request do
-  it "wipes only active offers by default and returns the count" do
-    Offer.create!(title: "A", company: "Acme")
-    Offer.create!(title: "B", company: "Globex")
-    Offer.create!(title: "C", company: "Init", archived: true)
+  it "archives every active offer by default — URLs preserved for dedup" do
+    Offer.create!(title: "A", company: "Acme", url: "https://ex.com/1")
+    Offer.create!(title: "B", company: "Globex", url: "https://ex.com/2")
+    Offer.create!(title: "C", company: "Init", url: "https://ex.com/3", archived: true)
 
     delete "/api/v1/offers/destroy_all"
 
     expect(response).to have_http_status(:ok)
-    expect(JSON.parse(response.body)).to eq("deleted" => 2)
-    expect(Offer.count).to eq(1) # the archived one survives
-    expect(Offer.first.archived).to be(true)
+    body = JSON.parse(response.body)
+    expect(body["archived"]).to eq(2)
+    expect(body["deleted"]).to eq(0)
+
+    # All rows still in DB so a re-scrape won't re-add them.
+    expect(Offer.count).to eq(3)
+    expect(Offer.active.count).to eq(0)
   end
 
-  it "wipes archived offers too when include_archived=true" do
-    Offer.create!(title: "A", company: "Acme")
-    Offer.create!(title: "B", company: "Globex", archived: true)
+  it "hard-deletes rows when hard=true (URLs gone — re-import possible)" do
+    Offer.create!(title: "A", company: "Acme", url: "https://ex.com/1")
+    Offer.create!(title: "B", company: "Globex", url: "https://ex.com/2")
+    Offer.create!(title: "C", company: "Init", url: "https://ex.com/3", archived: true)
 
-    delete "/api/v1/offers/destroy_all", params: { include_archived: "true" }
+    delete "/api/v1/offers/destroy_all", params: { hard: "true" }
 
     expect(response).to have_http_status(:ok)
-    expect(JSON.parse(response.body)).to eq("deleted" => 2)
+    body = JSON.parse(response.body)
+    expect(body["deleted"]).to eq(2)
+    expect(Offer.count).to eq(1) # only the archived one survives
+  end
+
+  it "hard-deletes including archived when hard=true and include_archived=true" do
+    Offer.create!(title: "A", company: "Acme", url: "https://ex.com/1")
+    Offer.create!(title: "B", company: "Globex", url: "https://ex.com/2", archived: true)
+
+    delete "/api/v1/offers/destroy_all", params: { hard: "true", include_archived: "true" }
+
+    expect(JSON.parse(response.body)["deleted"]).to eq(2)
     expect(Offer.count).to eq(0)
   end
 end

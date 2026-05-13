@@ -4,6 +4,7 @@ import type { Offer } from "@/types/offer";
 import { useCreateNote, useDeleteNote, useOfferDetail } from "@/hooks/useOfferDetail";
 import { StatusBadge } from "./StatusBadge";
 import { DescriptionView } from "./DescriptionView";
+import { ApplyKit } from "./ApplyKit";
 
 interface Props {
   offer: Offer;
@@ -105,6 +106,8 @@ export const OfferDetail = ({ offer, onEdit }: Props) => {
           </ul>
         </div>
       )}
+
+      <ApplyKit offerId={offer.id} />
 
       {detail.description && (
         <div>

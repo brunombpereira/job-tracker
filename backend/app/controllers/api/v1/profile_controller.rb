@@ -1,0 +1,101 @@
+module Api
+  module V1
+    # Serves the personal artefacts (CV, cover-letter templates, generated
+    # cover letters) that live in backend/storage/profile/ but never go
+    # to the public repo. The frontend hits these endpoints from the
+    # OfferDetail modal so the user can download what they need for the
+    # specific listing they're looking at.
+    class ProfileController < ApplicationController
+      # GET /api/v1/profile/files
+      # Catalog of what's available + the basic profile facts (used by
+      # the UI to render buttons + previews).
+      def files
+        render json: {
+          name:    profile_config["name"],
+          city:    profile_config["city"],
+          email:   profile_config["email"],
+          phone:   profile_config["phone"],
+          github:  profile_config["github"],
+          linkedin: profile_config["linkedin"],
+          cv:      cv_catalog,
+          cover_letters: cover_letter_catalog
+        }
+      end
+
+      # GET /api/v1/profile/cv?lang=pt|en&format=visual|ats
+      # Streams the matching CV file from disk with a download disposition.
+      def cv
+        lang   = params.fetch(:lang,   "pt").to_s
+        format = params.fetch(:format, "visual").to_s
+        path = cv_path_for(lang, format)
+        return head :not_found unless path&.exist?
+
+        send_file path, type: mime_for(path), disposition: "attachment", filename: path.basename.to_s
+      end
+
+      # GET /api/v1/profile/cover_letter?offer_id=:id&lang=pt|en[&download=true]
+      # Generates a per-offer cover letter from the template.
+      def cover_letter
+        offer = Offer.find(params.require(:offer_id))
+        lang  = params.fetch(:lang, "pt").to_s
+
+        text = Offers::CoverLetterGenerator.generate(offer: offer, lang: lang)
+
+        if params[:download] == "true"
+          filename = Offers::CoverLetterGenerator.new(offer: offer, lang: lang).filename
+          send_data text, type: "text/markdown; charset=utf-8", disposition: "attachment", filename: filename
+        else
+          render json: { content: text, filename: Offers::CoverLetterGenerator.new(offer: offer, lang: lang).filename }
+        end
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: "Offer not found" }, status: :not_found
+      rescue Offers::CoverLetterGenerator::MissingTemplate => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      private
+
+      def profile_config
+        Scorers::ProfileMatcher.config
+      end
+
+      def cv_root
+        Rails.root.join("storage", "profile", "cv")
+      end
+
+      def cv_path_for(lang, format)
+        return nil unless %w[pt en].include?(lang)
+        dir = cv_root.join(lang)
+        return nil unless dir.exist?
+
+        pattern = format == "ats" ? "*ATS*" : "*Visual*"
+        dir.glob(pattern).first
+      end
+
+      def cv_catalog
+        %w[pt en].each_with_object({}) do |lang, out|
+          out[lang] = {
+            visual: cv_path_for(lang, "visual")&.basename&.to_s,
+            ats:    cv_path_for(lang, "ats")&.basename&.to_s
+          }.compact
+        end
+      end
+
+      def cover_letter_catalog
+        %w[pt en].each_with_object({}) do |lang, out|
+          path = Rails.root.join("storage", "profile", "cover_letters", "template_#{lang}.md")
+          out[lang] = path.exist?
+        end
+      end
+
+      def mime_for(path)
+        case path.extname.downcase
+        when ".pdf"  then "application/pdf"
+        when ".docx" then "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        when ".html" then "text/html; charset=utf-8"
+        else "application/octet-stream"
+        end
+      end
+    end
+  end
+end

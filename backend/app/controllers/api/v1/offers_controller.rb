@@ -102,16 +102,22 @@ module Api
       end
 
       # DELETE /api/v1/offers/destroy_all
-      # Bulk-wipe the offers table so the user can start a clean search
-      # from scratch. By default only non-archived offers are removed —
-      # pass `?include_archived=true` to drop everything. Returns the
-      # number of offers actually deleted.
+      # Soft-archives every active offer so the list reads as empty but
+      # the URLs stay in the DB, preventing the next scrape from
+      # re-importing offers the user discarded. Power users can pass
+      # `?hard=true` to actually destroy the rows (URLs lost — the next
+      # scrape will re-add anything still on the source).
       def destroy_all
-        scope = Offer.all
-        scope = scope.active unless params[:include_archived] == "true"
-        deleted = scope.count
-        scope.destroy_all
-        render json: { deleted: deleted }
+        if params[:hard] == "true"
+          scope = Offer.all
+          scope = scope.active unless params[:include_archived] == "true"
+          count = scope.count
+          scope.destroy_all
+          render json: { archived: 0, deleted: count }
+        else
+          archived = Offer.active.update_all(archived: true)
+          render json: { archived: archived, deleted: 0 }
+        end
       end
 
       # POST /api/v1/offers/import_url
