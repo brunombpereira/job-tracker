@@ -49,6 +49,59 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
+      # POST /api/v1/offers/import
+      # Body: { offers: [ { title:, company:, ... }, ... ] }
+      # Dedupes by url; skips duplicates silently. Returns counts.
+      def import
+        rows = Array(params[:offers]).map do |row|
+          row.respond_to?(:to_unsafe_h) ? row.to_unsafe_h : row.to_h
+        end
+        created = 0
+        skipped = 0
+        errors  = []
+
+        rows.each_with_index do |row, i|
+          row = row.with_indifferent_access
+          url = row[:url].to_s.strip
+
+          if url.present? && Offer.exists?(url: url)
+            skipped += 1
+            next
+          end
+
+          attrs = row.slice(
+            "title", "company", "location", "modality", "url", "status",
+            "match_score", "salary_range", "company_size", "posted_date",
+            "description", "source_id", "stack"
+          )
+          attrs["stack"] = Array(attrs["stack"]) if attrs.key?("stack")
+
+          offer = Offer.new(attrs)
+          if offer.save
+            created += 1
+          else
+            errors << { index: i, errors: offer.errors.full_messages }
+          end
+        end
+
+        render json: {
+          created:     created,
+          skipped:     skipped,
+          error_count: errors.size,
+          errors:      errors
+        }
+      end
+
+      # GET /api/v1/offers/export.csv  or  .xlsx
+      def export
+        scope = apply_filters(apply_sort(Offer.includes(:source).active))
+
+        respond_to do |format|
+          format.csv  { send_data offers_csv(scope),  filename: "offers-#{Date.current}.csv",  type: "text/csv" }
+          format.xlsx { render xlsx: "export", locals: { offers: scope }, filename: "offers-#{Date.current}.xlsx" }
+        end
+      end
+
       private
 
       def set_offer
@@ -84,6 +137,26 @@ module Api
         return scope unless Offer::SORTABLE.include?(field) && %w[asc desc].include?(dir)
 
         scope.order(field => dir)
+      end
+
+      CSV_HEADERS = %w[
+        id title company location modality stack url status match_score
+        salary_range company_size posted_date found_date applied_date source
+      ].freeze
+
+      def offers_csv(scope)
+        require "csv"
+        CSV.generate(headers: true) do |csv|
+          csv << CSV_HEADERS
+          scope.find_each do |o|
+            csv << [
+              o.id, o.title, o.company, o.location, o.modality,
+              o.stack.join("|"), o.url, o.status, o.match_score,
+              o.salary_range, o.company_size, o.posted_date, o.found_date,
+              o.applied_date, o.source&.name
+            ]
+          end
+        end
       end
     end
   end

@@ -41,11 +41,13 @@ export const OffersList = () => {
     );
   }, [debouncedSearch]);
 
-  // Kanban fetches all matching offers up to 200 — pagination doesn't fit a
-  // board view since the user is meant to see all columns at once.
+  // Kanban fetches all matching offers up to KANBAN_LIMIT — pagination doesn't
+  // fit a board view since the user is meant to see all columns at once.
+  const KANBAN_LIMIT = 200;
   const effectiveFilters: OfferFilters =
-    view === "kanban" ? { ...filters, per_page: 200, page: 1 } : filters;
+    view === "kanban" ? { ...filters, per_page: KANBAN_LIMIT, page: 1 } : filters;
   const { data, isLoading, isFetching, error } = useOffers(effectiveFilters);
+  const kanbanTruncated = view === "kanban" && (data?.total ?? 0) > KANBAN_LIMIT;
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Offer | undefined>();
@@ -192,7 +194,15 @@ export const OffersList = () => {
             )}
 
             {!isLoading && offers.length > 0 && view === "kanban" && (
-              <KanbanBoard offers={offers} onCardClick={openEdit} />
+              <>
+                {kanbanTruncated && (
+                  <div className="mb-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    A mostrar apenas {KANBAN_LIMIT} de {total} ofertas — usa filtros ou a vista
+                    Lista para veres o resto.
+                  </div>
+                )}
+                <KanbanBoard offers={offers} onCardClick={openEdit} />
+              </>
             )}
           </section>
         </div>

@@ -208,6 +208,44 @@ RSpec.describe "Api::V1::Offers", type: :request do
     end
   end
 
+  describe "POST /api/v1/offers/import" do
+    it "creates new offers and dedupes by url" do
+      existing = create(:offer, url: "https://example.com/existing")
+
+      body = {
+        offers: [
+          { title: "New 1", company: "Co A", url: "https://example.com/new-1" },
+          { title: "New 2", company: "Co B", url: "https://example.com/new-2" },
+          { title: "Dup",   company: "Co C", url: existing.url }, # duplicate
+          { title: "Bad" } # missing required company
+        ]
+      }
+
+      expect { post "/api/v1/offers/import", params: body, as: :json }
+        .to change(Offer, :count).by(2)
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["created"]).to eq(2)
+      expect(json["skipped"]).to eq(1)
+      expect(json["error_count"]).to eq(1)
+    end
+  end
+
+  describe "GET /api/v1/offers/export.csv" do
+    let!(:offer) { create(:offer, title: "Export Me", company: "Acme") }
+
+    it "returns CSV with all active offers" do
+      get "/api/v1/offers/export.csv"
+
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to start_with("text/csv")
+      expect(response.body).to include("Export Me")
+      expect(response.body).to include("Acme")
+      expect(response.body.lines.first).to include("title,company")
+    end
+  end
+
   describe "PATCH /api/v1/offers/:id/status" do
     let(:offer) { create(:offer, status: "new") }
 

@@ -1,0 +1,25 @@
+wb = xlsx_package.workbook
+
+header_style = wb.styles.add_style(b: true, bg_color: "1F4E79", fg_color: "FFFFFF", border: { style: :thin, color: "888888" })
+row_style    = wb.styles.add_style(border: { style: :thin, color: "DDDDDD" })
+
+wb.add_worksheet(name: "Offers") do |sheet|
+  sheet.add_row(
+    %w[ID Title Company Location Modality Stack URL Status MatchScore Salary CompanySize PostedDate FoundDate AppliedDate Source],
+    style: header_style
+  )
+
+  offers.find_each do |o|
+    sheet.add_row(
+      [
+        o.id, o.title, o.company, o.location, o.modality,
+        o.stack.join(", "), o.url, o.status, o.match_score,
+        o.salary_range, o.company_size, o.posted_date, o.found_date,
+        o.applied_date, o.source&.name
+      ],
+      style: row_style
+    )
+  end
+
+  sheet.column_widths(6, 28, 22, 18, 12, 28, 36, 12, 6, 14, 12, 12, 12, 12, 14)
+end
