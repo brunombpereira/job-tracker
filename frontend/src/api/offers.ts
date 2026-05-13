@@ -8,6 +8,7 @@ const buildParams = (filters: OfferFilters) => {
   if (filters.match_score_gte) params.match_score_gte = filters.match_score_gte;
   if (filters.match_score_lte) params.match_score_lte = filters.match_score_lte;
   if (filters.location) params.location = filters.location;
+  if (filters.source_id) params.source_id = filters.source_id;
   if (filters.search) params.search = filters.search;
   if (filters.sort) params.sort = filters.sort;
   if (filters.page) params.page = filters.page;

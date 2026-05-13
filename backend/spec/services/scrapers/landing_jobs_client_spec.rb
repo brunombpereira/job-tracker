@@ -20,7 +20,7 @@ RSpec.describe Scrapers::LandingJobsClient do
       },
       {
         "id"           => 19020,
-        "title"        => "Senior Frontend Developer",
+        "title"        => "Frontend Developer",
         "url"          => "https://landing.jobs/at/some-startup/frontend-2",
         "remote"       => true,
         "role_description" => "Frontend stuff.",

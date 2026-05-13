@@ -1,21 +1,62 @@
 # sidekiq-cron schedule — loaded by config/initializers/sidekiq.rb on boot.
-# Adjust queries and queue with environment-specific overrides if needed.
+# Each entry fires one ScraperRunJob for a single source. Sources are
+# staggered by 5 minutes so they don't all hit the network at once.
+#
+# History note: Adzuna + ITJobs.pt entries were removed once Adzuna's free
+# tier got revoked and ITJobs.pt closed its public RSS behind Cloudflare.
+# LinkedIn / Indeed are imported one URL at a time via /offers/import_url
+# (see OfferUrlImporter) — bulk scraping there is infeasible.
 
-adzuna_daily:
-  cron: "0 6 * * *"          # Every day at 06:00 UTC
+remotive_daily:
+  cron: "0 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "Adzuna · Portugal · keywords from env"
+  description: "Remotive · open JSON API"
   args:
-    - "adzuna"
-    - keywords: "junior developer"
-      where: "Portugal"
+    - "remotive"
+    - category: "software-dev"
 
-itjobs_daily:
-  cron: "15 6 * * *"         # 06:15 UTC, after Adzuna
+landing_jobs_daily:
+  cron: "5 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "ITJobs.pt · RSS feed"
+  description: "Landing.jobs · REST API"
   args:
-    - "itjobs"
-    - role: "engenharia-informatica"
+    - "landing_jobs"
+    - limit: 50
+
+weworkremotely_daily:
+  cron: "10 6 * * *"
+  class: ScraperRunJob
+  queue: scrapers
+  description: "We Work Remotely · RSS"
+  args:
+    - "weworkremotely"
+    - category: "remote-programming-jobs"
+
+hn_whoshiring_weekly:
+  cron: "15 6 * * 1"          # Mondays only — thread refreshes monthly
+  class: ScraperRunJob
+  queue: scrapers
+  description: "HN Who's Hiring · Firebase API"
+  args:
+    - "hn_whoshiring"
+    - keywords: ""
+
+net_empregos_daily:
+  cron: "20 6 * * *"
+  class: ScraperRunJob
+  queue: scrapers
+  description: "Net-Empregos · RSS"
+  args:
+    - "net_empregos"
+    - keywords: "developer"
+
+teamlyzer_daily:
+  cron: "25 6 * * *"
+  class: ScraperRunJob
+  queue: scrapers
+  description: "Teamlyzer · HTML"
+  args:
+    - "teamlyzer"
+    - {}

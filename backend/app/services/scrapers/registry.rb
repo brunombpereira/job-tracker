@@ -37,20 +37,6 @@ module Scrapers
 
     SOURCES = [
       Source.new(
-        key: "adzuna", display_name: "Adzuna", tag: "API",
-        client_class_name: "Scrapers::AdzunaClient",
-        color: "#0a9396",
-        default_params: { keywords: "junior developer", where: "Portugal" },
-        env_required: %w[ADZUNA_APP_ID ADZUNA_APP_KEY]
-      ),
-      Source.new(
-        key: "itjobs", display_name: "ITJobs.pt", tag: "RSS",
-        client_class_name: "Scrapers::ItjobsClient",
-        color: "#ee6c4d",
-        default_params: { role: "engenharia-informatica" },
-        env_required: []
-      ),
-      Source.new(
         key: "remotive", display_name: "Remotive", tag: "API",
         client_class_name: "Scrapers::RemotiveClient",
         color: "#3da5d9",

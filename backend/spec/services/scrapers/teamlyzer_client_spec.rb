@@ -11,7 +11,7 @@ RSpec.describe Scrapers::TeamlyzerClient do
               <span class="role-tag backend">Backend</span>
               <div class="jobcard__title-row">
                 <h4 class="jobcard__title">
-                  <a href="/companies/get-job/a15a532a-440f-456d-8dee-1417f6ef1af3?v=jobboard">Senior software engineer</a>
+                  <a href="/companies/get-job/a15a532a-440f-456d-8dee-1417f6ef1af3?v=jobboard">Junior software engineer</a>
                 </h4>
               </div>
               <div class="jobcard__meta">
@@ -43,7 +43,7 @@ RSpec.describe Scrapers::TeamlyzerClient do
   it "creates one Offer per jobcard with full URL and role tag in stack" do
     expect { described_class.run }.to change(Offer, :count).by(2)
     senior = Offer.find_by(url: "https://pt.teamlyzer.com/companies/get-job/a15a532a-440f-456d-8dee-1417f6ef1af3?v=jobboard")
-    expect(senior.title).to eq("Senior software engineer")
+    expect(senior.title).to eq("Junior software engineer")
     expect(senior.company).to eq("Intellias")
     expect(senior.stack).to eq(["Backend"])
   end

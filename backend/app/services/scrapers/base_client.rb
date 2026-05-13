@@ -6,10 +6,20 @@ module Scrapers
   #   1. ensures a Source row for this scraper exists
   #   2. fetches raw offers (per source-specific shape)
   #   3. normalizes each to an Offer-compatible Hash
-  #   4. dedupes by URL and bulk-creates new Offers
-  #   5. returns counts: { found:, created:, skipped: }
+  #   4. filters out senior-level postings the user can't apply to
+  #   5. dedupes by URL and bulk-creates new Offers
+  #   6. returns counts: { found:, created:, skipped: }
   class BaseClient
     SOURCE_NAME = nil # subclasses override
+
+    # Title-substring exclusions for offers that don't match a junior
+    # profile. Override via the `SCRAPER_EXCLUDE_KEYWORDS` env var
+    # (comma-separated). Each entry is matched word-boundary unless it
+    # already contains non-word chars (so "sr." matches literally).
+    DEFAULT_EXCLUDED_KEYWORDS = %w[
+      senior sr. lead principal staff director head chief cto vp
+      manager architect
+    ].freeze
 
     class FetchError < StandardError; end
 
@@ -34,6 +44,7 @@ module Scrapers
       skipped = 0
       attrs.each do |a|
         next skipped += 1 if a[:url].blank?
+        next skipped += 1 if excluded_by_seniority?(a[:title])
         next skipped += 1 if Offer.exists?(url: a[:url])
 
         Offer.create!(a.merge(source_id: source.id))
@@ -56,6 +67,13 @@ module Scrapers
 
     private
 
+    def excluded_by_seniority?(title)
+      title_str = title.to_s.downcase
+      return false if title_str.empty?
+
+      self.class.excluded_patterns.any? { |pat| title_str.match?(pat) }
+    end
+
     def ensure_source!
       Source.find_or_create_by!(name: source_name.to_s.titleize) do |s|
         s.color = self.class::SOURCE_COLOR if self.class.const_defined?(:SOURCE_COLOR)
@@ -68,6 +86,32 @@ module Scrapers
         f.response :json, content_type: /\bjson$/
         f.options.timeout      = 20
         f.options.open_timeout = 5
+      end
+    end
+
+    class << self
+      # Pre-compiled regex patterns for the exclusion list. Cached at class
+      # level so we don't rebuild them per offer.
+      def excluded_patterns
+        @excluded_patterns ||= build_excluded_patterns
+      end
+
+      def reset_excluded_patterns!
+        @excluded_patterns = nil
+      end
+
+      private
+
+      def build_excluded_patterns
+        env = ENV["SCRAPER_EXCLUDE_KEYWORDS"].to_s.strip
+        words = env.empty? ? DEFAULT_EXCLUDED_KEYWORDS : env.split(",").map(&:strip).reject(&:empty?)
+        words.map do |kw|
+          escaped = Regexp.escape(kw.downcase)
+          # If the keyword has non-word chars (e.g. "sr.") use it literally.
+          # Otherwise wrap with word boundaries so "senior" doesn't match
+          # "sensor".
+          kw.match?(/\W/) ? Regexp.new(escaped) : Regexp.new("\\b#{escaped}\\b")
+        end
       end
     end
   end

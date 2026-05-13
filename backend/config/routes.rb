@@ -31,6 +31,7 @@ Rails.application.routes.draw do
 
       resources :scraper_runs, only: %i[index create]
       resources :search_batches, only: %i[index create show]
+      resources :sources, only: %i[index]
 
       get "stats", to: "stats#index"
     end

@@ -1,5 +1,6 @@
 import type { OfferFilters, OfferModality, OfferStatus } from "@/types/offer";
 import { MODALITY_VALUES, STATUS_VALUES } from "@/types/offer";
+import { useSources } from "@/hooks/useSources";
 
 interface Props {
   filters: OfferFilters;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const FiltersPanel = ({ filters, onChange }: Props) => {
+  const { data: sources } = useSources();
   const toggleStatus = (s: OfferStatus) => {
     const current = filters.status ?? [];
     const next = current.includes(s) ? current.filter((x) => x !== s) : [...current, s];
@@ -32,16 +34,22 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
   const setArchived = (on: boolean) =>
     onChange({ ...filters, include_archived: on || undefined, page: 1 });
 
+  const setSource = (id: number | undefined) =>
+    onChange({ ...filters, source_id: id, page: 1 });
+
   const clearAll = () =>
     onChange({ sort: filters.sort, per_page: filters.per_page, search: filters.search });
 
   const activeCount =
     (filters.status?.length ?? 0) +
     (filters.modality ? 1 : 0) +
+    (filters.source_id ? 1 : 0) +
     (filters.match_score_gte ? 1 : 0) +
     (filters.match_score_lte ? 1 : 0) +
     (filters.location ? 1 : 0) +
     (filters.include_archived ? 1 : 0);
+
+  const sourcesWithOffers = (sources ?? []).filter((s) => s.count > 0);
 
   return (
     <aside className="space-y-5 rounded-xl border border-edge bg-surface-raised p-5 text-sm shadow-soft">
@@ -82,6 +90,51 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
           })}
         </div>
       </section>
+
+      {sourcesWithOffers.length > 0 && (
+        <section>
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            Fonte
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSource(undefined)}
+              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
+                filters.source_id == null
+                  ? "border-accent bg-accent text-white"
+                  : "border-edge-strong bg-surface-raised text-ink-soft hover:border-accent"
+              }`}
+            >
+              Todas
+            </button>
+            {sourcesWithOffers.map((s) => {
+              const active = filters.source_id === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setSource(active ? undefined : s.id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition ${
+                    active
+                      ? "border-accent bg-accent text-white"
+                      : "border-edge-strong bg-surface-raised text-ink-soft hover:border-accent"
+                  }`}
+                  title={`${s.count} oferta(s)`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="h-1.5 w-1.5 rounded-full"
+                    style={{ backgroundColor: active ? "currentColor" : s.color }}
+                  />
+                  {s.name}
+                  <span className={active ? "opacity-80" : "text-ink-muted"}>· {s.count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section>
         <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">

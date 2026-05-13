@@ -25,7 +25,7 @@ RSpec.describe Scrapers::HnWhoshiringClient do
   let(:c3) do
     {
       id: 10003, by: "bob", time: 1746_000_100,
-      text: "Globex Corp | Senior Frontend | NYC, ONSITE | React<p>Send a CV"
+      text: "Globex Corp | Frontend Engineer | NYC, ONSITE | React<p>Send a CV"
     }.to_json
   end
 
@@ -56,7 +56,7 @@ RSpec.describe Scrapers::HnWhoshiringClient do
     globex = Offer.find_by(company: "Globex Corp")
     expect(acme.title).to eq("Backend Engineer")
     expect(acme.modality).to eq("remoto")
-    expect(globex.title).to eq("Senior Frontend")
+    expect(globex.title).to eq("Frontend Engineer")
     expect(globex.modality).to eq("presencial")
   end
 

@@ -8,14 +8,14 @@ RSpec.describe Scrapers::WeworkremotelyClient do
         <channel>
           <title>WWR</title>
           <item>
-            <title>Route: Sr. Manager, Design</title>
-            <link>https://weworkremotely.com/remote-jobs/route-sr-manager-design</link>
+            <title>Route: Junior Designer</title>
+            <link>https://weworkremotely.com/remote-jobs/route-junior-designer</link>
             <description>&lt;p&gt;Design things remotely.&lt;/p&gt;</description>
             <pubDate>Tue, 13 May 2026 09:00:00 +0000</pubDate>
-            <guid>https://weworkremotely.com/remote-jobs/route-sr-manager-design</guid>
+            <guid>https://weworkremotely.com/remote-jobs/route-junior-designer</guid>
           </item>
           <item>
-            <title>Acme Inc: Senior Ruby Engineer</title>
+            <title>Acme Inc: Ruby Engineer</title>
             <link>https://weworkremotely.com/remote-jobs/acme-ruby</link>
             <description>Ruby</description>
             <pubDate>Mon, 12 May 2026 09:00:00 +0000</pubDate>
@@ -33,8 +33,8 @@ RSpec.describe Scrapers::WeworkremotelyClient do
 
   it "splits `Company: Title` and marks all as remoto" do
     described_class.run
-    o = Offer.find_by(url: "https://weworkremotely.com/remote-jobs/route-sr-manager-design")
-    expect(o.title).to eq("Sr. Manager, Design")
+    o = Offer.find_by(url: "https://weworkremotely.com/remote-jobs/route-junior-designer")
+    expect(o.title).to eq("Junior Designer")
     expect(o.company).to eq("Route")
     expect(o.modality).to eq("remoto")
     expect(o.location).to eq("Remote")

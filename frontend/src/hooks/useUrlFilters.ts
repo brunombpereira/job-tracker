@@ -44,6 +44,9 @@ export function parseSearchParams(params: URLSearchParams): UrlState {
   const location = params.get("location");
   if (location) filters.location = location;
 
+  const sourceId = params.get("source_id");
+  if (sourceId) filters.source_id = Number(sourceId);
+
   const search = params.get("search");
   if (search) filters.search = search;
 
@@ -73,6 +76,7 @@ export function toSearchParams(state: UrlState): URLSearchParams {
   if (f.match_score_gte != null) p.set("match_score_gte", String(f.match_score_gte));
   if (f.match_score_lte != null) p.set("match_score_lte", String(f.match_score_lte));
   if (f.location) p.set("location", f.location);
+  if (f.source_id) p.set("source_id", String(f.source_id));
   if (f.search) p.set("search", f.search);
   if (f.sort && f.sort !== "match_score:desc") p.set("sort", f.sort);
   if (f.page && f.page !== 1) p.set("page", String(f.page));

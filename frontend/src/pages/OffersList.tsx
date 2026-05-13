@@ -11,8 +11,13 @@ import { Modal } from "@/components/Modal";
 import { OfferForm } from "@/components/OfferForm";
 import { KanbanBoard } from "@/components/KanbanBoard";
 import { OfferDetail } from "@/components/OfferDetail";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { AppHeader, type Tab } from "@/components/AppHeader";
 import type { Offer, OfferFilters } from "@/types/offer";
+
+interface OffersListProps {
+  tab: Tab;
+  onTabChange: (t: Tab) => void;
+}
 
 const SORT_OPTIONS = [
   { value: "match_score:desc", label: "Match score (alto → baixo)" },
@@ -28,12 +33,13 @@ const KANBAN_LIMIT = 200;
 const countActiveFilters = (f: OfferFilters) =>
   (f.status?.length ?? 0) +
   (f.modality ? 1 : 0) +
+  (f.source_id ? 1 : 0) +
   (f.match_score_gte ? 1 : 0) +
   (f.match_score_lte ? 1 : 0) +
   (f.location ? 1 : 0) +
   (f.include_archived ? 1 : 0);
 
-export const OffersList = () => {
+export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
   const { filters, setFilters, view, setView, searchInput, setSearchInput } =
     useUrlFilters();
 
@@ -83,20 +89,17 @@ export const OffersList = () => {
 
   return (
     <div className="min-h-screen bg-surface">
-      <header className="border-b border-edge bg-surface-raised">
-        <div className="container mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4">
-          <div>
-            <h1 className="font-serif text-2xl text-ink">JobTracker</h1>
-            <p className="hidden text-xs text-ink-muted sm:block">
-              Gerir candidaturas a empregos · brunombpereira/job-tracker
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
+      <AppHeader
+        tab={tab}
+        onTabChange={onTabChange}
+        subtitle="Gerir candidaturas a empregos"
+        actions={
+          <>
             <div className="inline-flex rounded-lg border border-edge bg-surface p-0.5 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setView("list")}
-                className={`rounded-md px-3 py-1 transition ${
+                className={`rounded-md px-3 py-1.5 transition ${
                   view === "list"
                     ? "bg-surface-raised text-ink shadow-soft"
                     : "text-ink-muted hover:text-ink"
@@ -107,7 +110,7 @@ export const OffersList = () => {
               <button
                 type="button"
                 onClick={() => setView("kanban")}
-                className={`rounded-md px-3 py-1 transition ${
+                className={`rounded-md px-3 py-1.5 transition ${
                   view === "kanban"
                     ? "bg-surface-raised text-ink shadow-soft"
                     : "text-ink-muted hover:text-ink"
@@ -119,17 +122,16 @@ export const OffersList = () => {
             <button
               type="button"
               onClick={openCreate}
-              className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep"
+              className="inline-flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep"
             >
               + Nova oferta
             </button>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
-      <main className="container mx-auto max-w-7xl px-4 py-6">
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <main className="container mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             type="search"
             placeholder="Pesquisar título, empresa ou descrição..."
@@ -160,7 +162,7 @@ export const OffersList = () => {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-[16rem,1fr]">
+        <div className="grid gap-8 md:grid-cols-[16rem,1fr]">
           {/* FiltersPanel — visible only on md+ as a sidebar */}
           <div className="hidden md:block">
             <FiltersPanel filters={filters} onChange={setFilters} />

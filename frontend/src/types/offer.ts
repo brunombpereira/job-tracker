@@ -41,6 +41,7 @@ export interface OfferFilters {
   match_score_gte?: number;
   match_score_lte?: number;
   location?: string;
+  source_id?: number;
   search?: string;
   sort?: string;
   page?: number;

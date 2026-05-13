@@ -8,12 +8,12 @@ RSpec.describe Scrapers::NetEmpregosClient do
         <channel>
           <title>Net-Empregos</title>
           <item>
-            <title><![CDATA[Senior Backend Developer (m/f)]]></title>
+            <title><![CDATA[Backend Developer (m/f)]]></title>
             <dc:creator><![CDATA[Acme Lda]]></dc:creator>
-            <link>https://www.net-empregos.com/15416450/senior-backend-developer/</link>
-            <description><![CDATA[&lt;b&gt;Empresa: &lt;/b&gt;Acme Lda&lt;br&gt;&lt;b&gt;Categoria: &lt;/b&gt;Informatica&lt;br&gt;&lt;b&gt;Zona: &lt;/b&gt; Aveiro&lt;br&gt;&lt;b&gt;Data: &lt;/b&gt;13-5-2026&lt;br&gt;&lt;br&gt;&lt;b&gt;Descrição: &lt;/b&gt;Ruby/Rails dev em regime remoto.&lt;br&gt;&lt;br&gt;&lt;a target='_blank' href='https://www.net-empregos.com/15416450/senior-backend-developer/'&gt;Ver Oferta de Emprego&lt;/a&gt;]]></description>
+            <link>https://www.net-empregos.com/15416450/backend-developer/</link>
+            <description><![CDATA[&lt;b&gt;Empresa: &lt;/b&gt;Acme Lda&lt;br&gt;&lt;b&gt;Categoria: &lt;/b&gt;Informatica&lt;br&gt;&lt;b&gt;Zona: &lt;/b&gt; Aveiro&lt;br&gt;&lt;b&gt;Data: &lt;/b&gt;13-5-2026&lt;br&gt;&lt;br&gt;&lt;b&gt;Descrição: &lt;/b&gt;Ruby/Rails dev em regime remoto.&lt;br&gt;&lt;br&gt;&lt;a target='_blank' href='https://www.net-empregos.com/15416450/backend-developer/'&gt;Ver Oferta de Emprego&lt;/a&gt;]]></description>
             <pubDate>Wed, 13 May 2026 00:00:00 GMT</pubDate>
-            <guid>https://www.net-empregos.com/15416450/senior-backend-developer/</guid>
+            <guid>https://www.net-empregos.com/15416450/backend-developer/</guid>
           </item>
           <item>
             <title><![CDATA[Electricista]]></title>
@@ -35,7 +35,7 @@ RSpec.describe Scrapers::NetEmpregosClient do
 
   it "parses Zona into location and creator into company" do
     described_class.run
-    dev = Offer.find_by(url: "https://www.net-empregos.com/15416450/senior-backend-developer/")
+    dev = Offer.find_by(url: "https://www.net-empregos.com/15416450/backend-developer/")
     expect(dev.company).to eq("Acme Lda")
     expect(dev.location).to eq("Aveiro")
     expect(dev.modality).to eq("remoto")
