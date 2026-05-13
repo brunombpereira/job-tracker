@@ -79,7 +79,7 @@ module Scrapers
         env_required: []
       ),
       Source.new(
-        key: "net_empregos", display_name: "Net-Empregos", tag: "HTML",
+        key: "net_empregos", display_name: "Net-Empregos", tag: "RSS",
         client_class_name: "Scrapers::NetEmpregosClient",
         color: "#1d3557",
         default_params: { keywords: "developer" },
