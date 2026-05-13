@@ -4,6 +4,8 @@
 #
 # History note: Adzuna + ITJobs.pt entries were removed once Adzuna's free
 # tier got revoked and ITJobs.pt closed its public RSS behind Cloudflare.
+# HN Who's Hiring also dropped — too US-remote-skewed and signal-to-noise
+# was below the threshold for the user's workflow.
 # LinkedIn / Indeed are imported one URL at a time via /offers/import_url
 # (see OfferUrlImporter) — bulk scraping there is infeasible.
 
@@ -20,10 +22,10 @@ landing_jobs_daily:
   cron: "5 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "Landing.jobs · REST API"
+  description: "Landing.jobs · 100 most recent listings"
   args:
     - "landing_jobs"
-    - limit: 50
+    - limit: 100
 
 weworkremotely_daily:
   cron: "10 6 * * *"
@@ -33,15 +35,6 @@ weworkremotely_daily:
   args:
     - "weworkremotely"
     - category: "remote-programming-jobs"
-
-hn_whoshiring_weekly:
-  cron: "15 6 * * 1"          # Mondays only — thread refreshes monthly
-  class: ScraperRunJob
-  queue: scrapers
-  description: "HN Who's Hiring · Firebase API"
-  args:
-    - "hn_whoshiring"
-    - keywords: ""
 
 net_empregos_daily:
   cron: "20 6 * * *"
@@ -65,9 +58,9 @@ linkedin_daily:
   cron: "30 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "LinkedIn · guest jobs API (junior PT, past week)"
+  description: "LinkedIn · guest jobs API · broad PT developer net, past month"
   args:
     - "linkedin"
-    - keywords: "junior developer"
+    - keywords: "developer"
       location: "Portugal"
-      time: "week"
+      time: "month"

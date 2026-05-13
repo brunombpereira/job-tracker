@@ -47,7 +47,9 @@ module Scrapers
         key: "landing_jobs", display_name: "Landing.jobs", tag: "API",
         client_class_name: "Scrapers::LandingJobsClient",
         color: "#7b2cbf",
-        default_params: { limit: 50 },
+        # Bumped from 50 → 100 so a broader slice of recent listings
+        # gets ranked rather than truncated.
+        default_params: { limit: 100 },
         env_required: []
       ),
       Source.new(
@@ -55,13 +57,6 @@ module Scrapers
         client_class_name: "Scrapers::WeworkremotelyClient",
         color: "#2d6a4f",
         default_params: { category: "remote-programming-jobs" },
-        env_required: []
-      ),
-      Source.new(
-        key: "hn_whoshiring", display_name: "HN Who's Hiring", tag: "API",
-        client_class_name: "Scrapers::HnWhoshiringClient",
-        color: "#ff6600",
-        default_params: { keywords: "" },
         env_required: []
       ),
       Source.new(
@@ -86,7 +81,11 @@ module Scrapers
         key: "linkedin", display_name: "LinkedIn", tag: "HTML",
         client_class_name: "Scrapers::LinkedinGuestClient",
         color: "#0a66c2",
-        default_params: { keywords: "junior developer", location: "Portugal", time: "week" },
+        # Broad net: every PT developer/engineer listing from the last
+        # month. ProfileMatcher handles the junior-vs-senior sorting
+        # afterwards — narrowing the query at LinkedIn level was hiding
+        # adjacent roles ("Software Engineer", "Web Developer", etc.).
+        default_params: { keywords: "developer", location: "Portugal", time: "month" },
         env_required: []
       )
     ].freeze

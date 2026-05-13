@@ -25,9 +25,9 @@ RSpec.describe "Api::V1::SearchBatches", type: :request do
       # Other sources fail predictably so partial-status tests stay clean.
       stub_request(:get, %r{landing\.jobs}).to_return(status: 502)
       stub_request(:get, %r{weworkremotely\.com}).to_return(status: 502)
-      stub_request(:get, %r{hacker-news\.firebaseio\.com}).to_return(status: 502)
       stub_request(:get, %r{net-empregos\.com}).to_return(status: 502)
       stub_request(:get, %r{teamlyzer\.com}).to_return(status: 502)
+      stub_request(:get, %r{linkedin\.com}).to_return(status: 502)
     end
 
     it "creates a batch with only the requested sources and runs them" do
