@@ -20,3 +20,6 @@
 
 # Coverage
 /coverage/
+
+# RSpec persistence
+/spec/examples.txt
