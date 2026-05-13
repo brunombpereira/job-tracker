@@ -60,32 +60,34 @@ module Scrapers
         env_required: []
       ),
       Source.new(
-        key: "net_empregos", display_name: "Net-Empregos", tag: "RSS",
+        key: "net_empregos", display_name: "Net-Empregos", tag: "HTML",
         client_class_name: "Scrapers::NetEmpregosClient",
         color: "#1d3557",
-        # "Informática" matches all four sub-categories (Programação,
-        # Análise, Gestão de Redes, Web/Multimédia) — broader net so
-        # adjacent tech roles also land in the inbox and get ranked by
-        # ProfileMatcher.
-        default_params: { category: "Informática" },
+        # Net-Empregos has 1.5k+ Programação listings but the RSS feed
+        # was only surfacing ~4. We now paginate the HTML category
+        # listing (18 items/page) — 3 pages → 54 freshest listings.
+        # Pass `pages: N` (1–8) to widen further.
+        default_params: { pages: 3 },
         env_required: []
       ),
       Source.new(
         key: "teamlyzer", display_name: "Teamlyzer", tag: "HTML",
         client_class_name: "Scrapers::TeamlyzerClient",
         color: "#e07a5f",
-        default_params: {},
+        # 3 pages × ~20 cards = ~60 listings vs the previous single-page
+        # ~20. Bump `pages` to widen, max 5.
+        default_params: { pages: 3 },
         env_required: []
       ),
       Source.new(
         key: "linkedin", display_name: "LinkedIn", tag: "HTML",
         client_class_name: "Scrapers::LinkedinGuestClient",
         color: "#0a66c2",
-        # Broad net: every PT developer/engineer listing from the last
-        # month. ProfileMatcher handles the junior-vs-senior sorting
-        # afterwards — narrowing the query at LinkedIn level was hiding
-        # adjacent roles ("Software Engineer", "Web Developer", etc.).
-        default_params: { keywords: "developer", location: "Portugal", time: "month" },
+        # LinkedIn's guest API returns ~10 unique cards per request;
+        # 10 pages ≈ 90 unique listings after dedup, which is roughly
+        # what the public preview surfaces for a broad query.
+        # ProfileMatcher handles junior-vs-senior sorting afterwards.
+        default_params: { keywords: "developer", location: "Portugal", time: "month", pages: 10 },
         env_required: []
       )
     ].freeze

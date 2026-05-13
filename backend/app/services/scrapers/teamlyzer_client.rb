@@ -7,28 +7,42 @@ module Scrapers
   #   • .jobcard__company  → company display name
   #   • .role-tag          → role classification (Backend, Frontend, ...)
   #
-  # Apply URLs are stable (`/companies/get-job/{uuid}?v=jobboard`) so they
-  # serve as the dedup key. A `keywords` param filters titles/companies
-  # client-side.
+  # Apply URLs are stable (`/companies/get-job/{uuid}?v=jobboard`) so
+  # they serve as the dedup key. The board paginates via `?page=N` —
+  # we walk a few pages by default since one page only surfaces ~20
+  # listings.
   class TeamlyzerClient < BaseClient
     SOURCE_NAME  = "teamlyzer"
     SOURCE_COLOR = "#e07a5f"
-    BASE_URL = "https://pt.teamlyzer.com"
+    BASE_URL     = "https://pt.teamlyzer.com"
+    MAX_PAGES    = 5
+    PAGE_DELAY   = 0.5
 
     def fetch_raw(params)
-      res = Faraday.get("#{BASE_URL}/companies/jobs") do |r|
-        r.options.timeout = 25
-        r.headers["User-Agent"] = "Mozilla/5.0 (+JobTracker/1.0)"
+      pages = (params[:pages] || 3).to_i.clamp(1, MAX_PAGES)
+      kw    = params[:keywords].to_s.downcase
+
+      raws = []
+      seen = Set.new
+      (1..pages).each do |page_num|
+        cards = fetch_page(page_num)
+        break if cards.empty?
+
+        new_in_page = 0
+        cards.each do |card|
+          attrs = extract_card(card)
+          next unless attrs
+          next if seen.include?(attrs[:url])
+          next if kw.present? && !"#{attrs[:title]} #{attrs[:company]}".downcase.include?(kw)
+          seen << attrs[:url]
+          raws << attrs
+          new_in_page += 1
+        end
+        break if new_in_page.zero?
+
+        polite_sleep(PAGE_DELAY) if page_num < pages
       end
-      raise FetchError, "HTTP #{res.status}" unless res.success?
-
-      doc = Nokogiri::HTML(res.body)
-      cards = doc.css("div.row.jobboard-ad div.panel.jobcard")
-
-      kw = params[:keywords].to_s.downcase
-      raws = cards.map { |card| extract_card(card) }.compact
-
-      kw.present? ? raws.select { |r| "#{r[:title]} #{r[:company]}".downcase.include?(kw) } : raws
+      raws
     rescue Faraday::Error => e
       raise FetchError, "Teamlyzer fetch failed: #{e.message}"
     end
@@ -49,6 +63,16 @@ module Scrapers
     end
 
     private
+
+    def fetch_page(page_num)
+      res = Faraday.get("#{BASE_URL}/companies/jobs") do |r|
+        r.options.timeout = 25
+        r.headers["User-Agent"] = "Mozilla/5.0 (+JobTracker/1.0)"
+        r.params["page"] = page_num if page_num > 1
+      end
+      raise FetchError, "HTTP #{res.status}" unless res.success?
+      Nokogiri::HTML(res.body).css("div.row.jobboard-ad div.panel.jobcard")
+    end
 
     def extract_card(card)
       title_a = card.at_css(".jobcard__title a[href*='get-job']")

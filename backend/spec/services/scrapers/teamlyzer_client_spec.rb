@@ -36,12 +36,15 @@ RSpec.describe Scrapers::TeamlyzerClient do
   end
 
   before do
-    stub_request(:get, "https://pt.teamlyzer.com/companies/jobs")
+    # Match page=1 (no param) and page=2 with the same fixture so the
+    # paginating client's loop still terminates by hitting the
+    # "no new URLs" guard after the second pass.
+    stub_request(:get, %r{pt\.teamlyzer\.com/companies/jobs})
       .to_return(status: 200, body: html, headers: { "Content-Type" => "text/html" })
   end
 
   it "creates one Offer per jobcard with full URL and role tag in stack" do
-    expect { described_class.run }.to change(Offer, :count).by(2)
+    expect { described_class.run(pages: 1) }.to change(Offer, :count).by(2)
     senior = Offer.find_by(url: "https://pt.teamlyzer.com/companies/get-job/a15a532a-440f-456d-8dee-1417f6ef1af3?v=jobboard")
     expect(senior.title).to eq("Junior software engineer")
     expect(senior.company).to eq("Intellias")
@@ -49,7 +52,7 @@ RSpec.describe Scrapers::TeamlyzerClient do
   end
 
   it "filters by keywords on title/company" do
-    result = described_class.run(keywords: "frontend")
+    result = described_class.run(pages: 1, keywords: "frontend")
     expect(result[:created]).to eq(1)
     expect(Offer.last.title).to eq("Frontend dev")
   end

@@ -65,9 +65,17 @@ RSpec.describe Scrapers::LinkedinGuestClient do
   end
 
   it "honors keyword/location/time params on the endpoint" do
-    described_class.run(keywords: "rails dev", location: "Porto", time: "week")
+    described_class.run(keywords: "rails dev", location: "Porto", time: "week", pages: 1)
     expect(WebMock).to have_requested(:get, %r{linkedin\.com/jobs-guest/jobs/api/seeMoreJobPostings/search})
       .with(query: hash_including("keywords" => "rails dev", "location" => "Porto", "f_TPR" => "r604800"))
+  end
+
+  it "paginates via the `start` offset and dedupes across pages" do
+    described_class.run(pages: 3)
+    # Same fixture returned on every page, so the dedup guard breaks the
+    # loop after the 2nd page (0 new URLs). Expect exactly 2 requests.
+    expect(WebMock).to have_requested(:get, %r{linkedin\.com})
+      .with(query: hash_including("start" => "25")).once
   end
 
   it "raises FetchError on HTTP failure" do

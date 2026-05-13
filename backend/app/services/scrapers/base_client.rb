@@ -91,5 +91,13 @@ module Scrapers
         f.options.open_timeout = 5
       end
     end
+
+    # Used by paginating clients (Net-Empregos / LinkedIn / Teamlyzer)
+    # to be polite between requests in production while keeping the
+    # specs instantaneous.
+    def polite_sleep(seconds)
+      return if Rails.env.test?
+      sleep(seconds)
+    end
   end
 end

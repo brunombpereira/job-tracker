@@ -3,21 +3,24 @@ module Scrapers
   # powers the public job-listings preview shown to logged-out visitors:
   #   /jobs-guest/jobs/api/seeMoreJobPostings/search
   #
-  # The endpoint returns 40 job-card HTML fragments per page (paginated
-  # via `start=0|40|80…`) without a login wall or Cloudflare challenge,
-  # because LinkedIn explicitly exposes it for SEO and guest browsing.
-  # We parse the fragments with Nokogiri and dedupe by the canonical
-  # /jobs/view/{slug}-{id} URL each card carries.
+  # Each request returns ~40 job-card HTML fragments. To pull more than
+  # one screen's worth we paginate via the `start` offset (LinkedIn's
+  # UI increments by 25 — we use 25 too so overlap-induced dedup is
+  # negligible). Pages stop early when the response is empty or when
+  # the page yields no new URLs we haven't already seen.
   class LinkedinGuestClient < BaseClient
     SOURCE_NAME  = "linkedin"
     SOURCE_COLOR = "#0a66c2"
 
-    ENDPOINT = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+    ENDPOINT   = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
+    # The guest endpoint returns ~10 unique cards per request and
+    # increments by 25 in the UI. We bump start by 25 each call and
+    # let the URL-dedup guard catch the few overlapping cards.
+    PAGE_SIZE  = 25
+    MAX_PAGES  = 12
+    PAGE_DELAY = 0.7
 
-    # Time-posted filter codes that LinkedIn understands (`f_TPR`):
-    #   r86400  → past 24 hours
-    #   r604800 → past week
-    #   r2592000 → past month
+    # Time-posted filter codes that LinkedIn understands (`f_TPR`).
     TIME_FILTERS = {
       "day"   => "r86400",
       "week"  => "r604800",
@@ -25,25 +28,33 @@ module Scrapers
     }.freeze
 
     def fetch_raw(params)
-      keywords = params[:keywords].to_s.presence || "junior developer"
+      pages    = (params[:pages] || 4).to_i.clamp(1, MAX_PAGES)
+      keywords = params[:keywords].to_s.presence || "developer"
       location = params[:location].to_s.presence || "Portugal"
       time     = TIME_FILTERS[params[:time].to_s] # nil = any
       start_at = params[:start].to_i
 
-      res = Faraday.get(ENDPOINT) do |r|
-        r.options.timeout = 25
-        r.headers["User-Agent"] = browser_ua
-        r.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        r.headers["Accept-Language"] = "en-US,en;q=0.9,pt;q=0.8"
-        r.params["keywords"] = keywords
-        r.params["location"] = location
-        r.params["start"]    = start_at if start_at.positive?
-        r.params["f_TPR"]    = time     if time
-      end
-      raise FetchError, "HTTP #{res.status}" unless res.success?
+      cards = []
+      seen  = Set.new
+      pages.times do |i|
+        offset = start_at + i * PAGE_SIZE
+        page_cards = fetch_page(keywords, location, time, offset)
+        break if page_cards.empty?
 
-      doc = Nokogiri::HTML(res.body)
-      doc.css("li > div.base-search-card, div.base-card.base-search-card").map { |card| extract(card) }.compact
+        new_in_page = 0
+        page_cards.each do |card|
+          attrs = extract(card)
+          next unless attrs
+          next if seen.include?(attrs[:url])
+          seen << attrs[:url]
+          cards << attrs
+          new_in_page += 1
+        end
+        break if new_in_page.zero?
+
+        polite_sleep(PAGE_DELAY) if i < pages - 1
+      end
+      cards
     rescue Faraday::Error => e
       raise FetchError, "LinkedIn fetch failed: #{e.message}"
     end
@@ -66,8 +77,25 @@ module Scrapers
 
     private
 
+    def fetch_page(keywords, location, time, offset)
+      res = Faraday.get(ENDPOINT) do |r|
+        r.options.timeout = 25
+        r.headers["User-Agent"]      = browser_ua
+        r.headers["Accept"]          = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        r.headers["Accept-Language"] = "en-US,en;q=0.9,pt;q=0.8"
+        r.params["keywords"] = keywords
+        r.params["location"] = location
+        r.params["start"]    = offset if offset.positive?
+        r.params["f_TPR"]    = time   if time
+      end
+      raise FetchError, "HTTP #{res.status}" unless res.success?
+
+      doc = Nokogiri::HTML(res.body)
+      doc.css("li > div.base-search-card, div.base-card.base-search-card")
+    end
+
     def extract(card)
-      url = card.at_css("a.base-card__full-link")&.[]("href")
+      url   = card.at_css("a.base-card__full-link")&.[]("href")
       title = card.at_css(".base-search-card__title")&.text&.strip
       return nil if url.blank? || title.blank?
 
@@ -80,9 +108,8 @@ module Scrapers
       }
     end
 
-    # The card's apply URL carries tracking params (refId, trackingId) that
-    # change on every request and would break our by-URL dedup. Strip
-    # everything after the query separator.
+    # Apply URLs carry refId/trackingId/etc. that rotate per request —
+    # strip the query string so by-URL dedup works across runs.
     def strip_tracking(url)
       url.split("?").first
     end
@@ -100,9 +127,6 @@ module Scrapers
       "presencial"
     end
 
-    # A current-ish Chrome UA — LinkedIn's guest endpoint serves the same
-    # HTML for any browser-shaped client but rejects bare `curl` or
-    # unrecognised UAs.
     def browser_ua
       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " \
         "AppleWebKit/537.36 (KHTML, like Gecko) " \
