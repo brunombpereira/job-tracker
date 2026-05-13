@@ -1,0 +1,21 @@
+# sidekiq-cron schedule — loaded by config/initializers/sidekiq.rb on boot.
+# Adjust queries and queue with environment-specific overrides if needed.
+
+adzuna_daily:
+  cron: "0 6 * * *"          # Every day at 06:00 UTC
+  class: ScraperRunJob
+  queue: scrapers
+  description: "Adzuna · Portugal · keywords from env"
+  args:
+    - "adzuna"
+    - keywords: "junior developer"
+      where: "Portugal"
+
+itjobs_daily:
+  cron: "15 6 * * *"         # 06:15 UTC, after Adzuna
+  class: ScraperRunJob
+  queue: scrapers
+  description: "ITJobs.pt · RSS feed"
+  args:
+    - "itjobs"
+    - role: "engenharia-informatica"

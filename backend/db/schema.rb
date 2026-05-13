@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_13_120004) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_14_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -47,6 +47,23 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_13_120004) do
     t.index ["stack"], name: "index_offers_on_stack", using: :gin
     t.index ["status"], name: "index_offers_on_status"
     t.index ["url"], name: "index_offers_on_url", unique: true, where: "(url IS NOT NULL)"
+  end
+
+  create_table "scraper_runs", force: :cascade do |t|
+    t.string "source_name", null: false
+    t.string "status", default: "pending", null: false
+    t.integer "offers_found", default: 0, null: false
+    t.integer "offers_created", default: 0, null: false
+    t.integer "offers_skipped", default: 0, null: false
+    t.jsonb "params", default: {}, null: false
+    t.text "error_message"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_scraper_runs_on_created_at"
+    t.index ["source_name"], name: "index_scraper_runs_on_source_name"
+    t.index ["status"], name: "index_scraper_runs_on_status"
   end
 
   create_table "sources", force: :cascade do |t|

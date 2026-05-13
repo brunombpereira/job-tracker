@@ -30,6 +30,14 @@ gem "pagy", "~> 8.0"
 gem "caxlsx", "~> 4.0"
 gem "caxlsx_rails"
 
+# Background jobs + scheduled scrapers
+gem "sidekiq", "~> 7.3"
+gem "sidekiq-cron", "~> 1.12"
+
+# HTTP client + RSS parsing for scrapers
+gem "faraday", "~> 2.10"
+gem "feedjira", "~> 3.2"
+
 group :development, :test do
   gem "debug", platforms: %i[mri windows]
   gem "rspec-rails", "~> 7.0"
@@ -47,4 +55,5 @@ end
 group :test do
   gem "shoulda-matchers", "~> 6.0"
   gem "simplecov", require: false
+  gem "webmock", "~> 3.24"
 end

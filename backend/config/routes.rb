@@ -1,6 +1,19 @@
+require "sidekiq/web"
+require "sidekiq/cron/web"
+
 Rails.application.routes.draw do
   # Health check
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Sidekiq dashboard at /sidekiq — protected by basic auth in production.
+  # Username/password set via SIDEKIQ_USERNAME / SIDEKIQ_PASSWORD env vars.
+  if Rails.env.production?
+    Sidekiq::Web.use(Rack::Auth::Basic) do |user, password|
+      ActiveSupport::SecurityUtils.secure_compare(user, ENV.fetch("SIDEKIQ_USERNAME", "")) &&
+        ActiveSupport::SecurityUtils.secure_compare(password, ENV.fetch("SIDEKIQ_PASSWORD", ""))
+    end
+  end
+  mount Sidekiq::Web => "/sidekiq"
 
   namespace :api do
     namespace :v1 do
@@ -14,6 +27,8 @@ Rails.application.routes.draw do
         end
         resources :notes, only: %i[create destroy]
       end
+
+      resources :scraper_runs, only: %i[index create]
 
       get "stats", to: "stats#index"
     end

@@ -6,6 +6,15 @@ abort("Rails is running in production mode!") if Rails.env.production?
 require "rspec/rails"
 require "shoulda/matchers"
 require "factory_bot_rails"
+require "webmock/rspec"
+
+# Block ALL real network access during tests; failed connections surface as
+# WebMock::NetConnectNotAllowedError so we know exactly what to stub.
+WebMock.disable_net_connect!(allow_localhost: true)
+
+# ActiveJob inline so scraper job specs can drive the work synchronously.
+require "sidekiq/testing"
+Sidekiq::Testing.inline!
 
 Dir[Rails.root.join("spec/support/**/*.rb")].sort.each { |f| require f }
 
@@ -22,6 +31,10 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   config.include FactoryBot::Syntax::Methods
+
+  # Run ActiveJob inline so request specs that enqueue jobs can assert on
+  # the side effects (without needing to also run Sidekiq).
+  config.before(:each) { ActiveJob::Base.queue_adapter = :inline }
 end
 
 Shoulda::Matchers.configure do |config|

@@ -80,6 +80,8 @@ GEM
       mutex_m
       securerandom (>= 0.3)
       tzinfo (~> 2.0)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     annotate (3.2.0)
       activerecord (>= 3.2, < 8.0)
       rake (>= 10.4, < 14.0)
@@ -101,6 +103,9 @@ GEM
     cgi (0.5.1)
     concurrent-ruby (1.3.6)
     connection_pool (3.0.2)
+    crack (1.0.1)
+      bigdecimal
+      rexml
     crass (1.0.6)
     date (3.5.1)
     debug (1.11.1)
@@ -115,6 +120,8 @@ GEM
     drb (2.2.3)
     erb (6.0.4)
     erubi (1.13.1)
+    et-orbi (1.4.0)
+      tzinfo
     factory_bot (6.6.0)
       activesupport (>= 6.1.0)
     factory_bot_rails (6.5.1)
@@ -122,8 +129,22 @@ GEM
       railties (>= 6.1.0)
     faker (3.8.0)
       i18n (>= 1.8.11, < 2)
+    faraday (2.14.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
+    feedjira (3.2.6)
+      logger (>= 1.0, < 2)
+      loofah (>= 2.3.1, < 3)
+      sax-machine (>= 1.0, < 2)
+    fugit (1.12.1)
+      et-orbi (~> 1.4)
+      raabro (~> 1.4)
     globalid (1.3.0)
       activesupport (>= 6.1)
+    hashdiff (1.2.1)
     htmlentities (4.4.2)
     i18n (1.14.8)
       concurrent-ruby (~> 1.0)
@@ -155,6 +176,8 @@ GEM
       prism (~> 1.5)
     msgpack (1.8.0)
     mutex_m (0.3.0)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.6.4)
       date
       net-protocol
@@ -183,8 +206,10 @@ GEM
     psych (5.3.1)
       date
       stringio
+    public_suffix (7.0.5)
     puma (8.0.1)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.6)
     rack-cors (3.0.0)
@@ -234,9 +259,12 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
+    redis-client (0.29.0)
+      connection_pool
     regexp_parser (2.12.0)
     reline (0.6.3)
       io-console (~> 0.5)
+    rexml (3.4.4)
     rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -287,9 +315,20 @@ GEM
       rubocop (~> 1.81)
     ruby-progressbar (1.13.0)
     rubyzip (3.3.0)
+    sax-machine (1.3.2)
     securerandom (0.4.1)
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
+    sidekiq (7.3.9)
+      base64
+      connection_pool (>= 2.3.0)
+      logger
+      rack (>= 2.2.4)
+      redis-client (>= 0.22.2)
+    sidekiq-cron (1.12.0)
+      fugit (~> 1.8)
+      globalid (>= 1.0.1)
+      sidekiq (>= 6)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -307,6 +346,11 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.2.0)
+    uri (1.1.1)
+    webmock (3.26.2)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
     websocket-driver (0.8.0)
       base64
       websocket-extensions (>= 0.1.0)
@@ -326,6 +370,8 @@ DEPENDENCIES
   dotenv-rails
   factory_bot_rails
   faker
+  faraday (~> 2.10)
+  feedjira (~> 3.2)
   jsonapi-serializer
   pagy (~> 8.0)
   pg (~> 1.5)
@@ -336,8 +382,11 @@ DEPENDENCIES
   rubocop-rails-omakase
   rubocop-rspec
   shoulda-matchers (~> 6.0)
+  sidekiq (~> 7.3)
+  sidekiq-cron (~> 1.12)
   simplecov
   tzinfo-data
+  webmock (~> 3.24)
 
 RUBY VERSION
    ruby 3.3.11p205

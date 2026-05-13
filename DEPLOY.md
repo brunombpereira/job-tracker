@@ -16,14 +16,30 @@ Total deploy time: ~15 minutes the first time, fully automatic afterwards (push 
 - Authorize Render to read your repos when prompted.
 
 ### Step 2: Deploy via Blueprint
-The repo has a `render.yaml` at the root that describes the whole setup (web service + Postgres + env vars).
+The repo has a `render.yaml` at the root that provisions FOUR services:
+
+- **`jobtracker-api`** — Rails API (Puma) — the public endpoint
+- **`jobtracker-worker`** — Sidekiq worker — runs scraper jobs (Adzuna, ITJobs.pt) on the daily 06:00 UTC cron
+- **`jobtracker-redis`** — Redis instance — Sidekiq broker
+- **`jobtracker-db`** — PostgreSQL 16
 
 1. In Render, click **New +** → **Blueprint**.
 2. Click **Connect a repository** and pick `brunombpereira/job-tracker`.
-3. Render reads `render.yaml`, shows you what it'll create (one web service `jobtracker-api`, one database `jobtracker-db`), and asks you to confirm.
-4. Click **Apply**. Render provisions the database first (~1 min), then builds the web service (~3 min).
+3. Render reads `render.yaml` and shows the 4 resources. Click **Apply**.
+4. Provisioning takes ~5-7 min (database first, then Redis, then web + worker in parallel).
 
-The `bin/render-build` script runs migrations + seeds on first deploy, so you get the 7 placeholder offers automatically.
+The `bin/render-build` script runs migrations + idempotent seeds on the web service's build, so you get the 7 placeholder offers automatically.
+
+### Step 2b (optional): Activate Adzuna scraper
+ITJobs.pt scraping works out of the box (no key). For Adzuna:
+
+1. Register a free app at https://developer.adzuna.com → get APP_ID + APP_KEY.
+2. In Render dashboard → service `jobtracker-api` → Environment, set `ADZUNA_APP_ID` and `ADZUNA_APP_KEY`.
+3. Repeat for service `jobtracker-worker` (same values).
+4. Both services redeploy. The 06:00 UTC cron starts fetching the next day, or trigger manually from the "Procurar" tab in the UI.
+
+### Step 2c: Sidekiq dashboard
+Available at `https://jobtracker-api.onrender.com/sidekiq`. Username `admin`, password from `SIDEKIQ_PASSWORD` env var (auto-generated, visible in Render dashboard).
 
 ### Step 3: Note the URL
 After the deploy succeeds, the web service has a URL like `https://jobtracker-api.onrender.com`. Copy it.

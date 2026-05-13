@@ -8,7 +8,7 @@ Rails.application.configure do
 
   config.cache_store = :solid_cache_store if defined?(SolidCache)
 
-  config.active_job.queue_adapter = :async
+  config.active_job.queue_adapter = :sidekiq
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")
   config.log_tags = [:request_id]
   config.logger = ActiveSupport::Logger.new($stdout)

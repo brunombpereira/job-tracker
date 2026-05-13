@@ -19,4 +19,9 @@ Rails.application.configure do
 
   config.active_job.verbose_enqueue_logs = true
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Use Sidekiq for ActiveJob in development too, so workers can be tested
+  # locally with `bundle exec sidekiq` against the local Redis.
+  # Set ACTIVE_JOB_INLINE=true if you want jobs to run inline instead.
+  config.active_job.queue_adapter = ENV["ACTIVE_JOB_INLINE"] == "true" ? :inline : :sidekiq
 end

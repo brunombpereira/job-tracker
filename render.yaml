@@ -1,12 +1,20 @@
-# Render Blueprint — provisions the JobTracker Rails API + PostgreSQL on render.com
+# Render Blueprint — provisions the JobTracker stack on render.com.
+#
+# Layout:
+#   - web service "jobtracker-api"     · Rails API (Puma)
+#   - worker     "jobtracker-worker"   · Sidekiq, processes :default + :scrapers
+#   - redis      "jobtracker-redis"    · Sidekiq broker
+#   - database   "jobtracker-db"       · PostgreSQL 16
 #
 # Quick start:
-#   1. Push this file to main on github.com/brunombpereira/job-tracker
+#   1. Push to main on github.com/brunombpereira/job-tracker
 #   2. On render.com: New + → Blueprint → connect this repo → Apply
-#   3. After provisioning, set the CORS_ORIGINS env var to your Vercel frontend URL.
+#   3. After provisioning, set CORS_ORIGINS to your Vercel frontend URL.
+#   4. Optionally set ADZUNA_APP_ID + ADZUNA_APP_KEY to activate the Adzuna scraper.
 #
 # Free tier notes:
-#   - Web service spins down after 15 min idle; first request takes ~30s to wake.
+#   - Web service spins down after 15 min idle; first request takes ~30s.
+#   - Worker keeps running. Free Redis is 25MB / volatile.
 #   - PostgreSQL on free tier is destroyed after 90 days unless upgraded.
 
 services:
@@ -25,6 +33,11 @@ services:
         fromDatabase:
           name: jobtracker-db
           property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: jobtracker-redis
+          type: redis
+          property: connectionString
       - key: RAILS_ENV
         value: production
       - key: RAILS_LOG_TO_STDOUT
@@ -33,10 +46,55 @@ services:
         value: "true"
       - key: SECRET_KEY_BASE
         generateValue: true
+      - key: SIDEKIQ_USERNAME
+        value: admin
+      - key: SIDEKIQ_PASSWORD
+        generateValue: true
       - key: CORS_ORIGINS
-        # Set this once the frontend is deployed.
-        # Example: https://job-tracker-ui.vercel.app,https://www.example.com
+        sync: false       # set in dashboard after frontend deploys
+      - key: ADZUNA_APP_ID
+        sync: false       # set in dashboard if Adzuna scraper desired
+      - key: ADZUNA_APP_KEY
         sync: false
+
+  - type: worker
+    name: jobtracker-worker
+    runtime: ruby
+    plan: free
+    region: frankfurt
+    branch: main
+    rootDir: backend
+    buildCommand: bundle install
+    startCommand: bundle exec sidekiq -C config/sidekiq.yml
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jobtracker-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: jobtracker-redis
+          type: redis
+          property: connectionString
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: SECRET_KEY_BASE
+        fromService:
+          name: jobtracker-api
+          type: web
+          envVarKey: SECRET_KEY_BASE
+      - key: ADZUNA_APP_ID
+        sync: false
+      - key: ADZUNA_APP_KEY
+        sync: false
+
+  - type: redis
+    name: jobtracker-redis
+    plan: free
+    region: frankfurt
+    ipAllowList: []     # empty = only-internal; web + worker have access via REDIS_URL
 
 databases:
   - name: jobtracker-db
