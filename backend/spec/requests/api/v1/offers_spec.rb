@@ -115,6 +115,24 @@ RSpec.describe "Api::V1::Offers", type: :request do
         body = JSON.parse(response.body)
         expect(body.size).to be >= 3
       end
+
+      it "filters by needs_followup" do
+        stale = create(:offer, status: "applied",
+                               applied_date: (Offer::FOLLOWUP_DAYS + 1).days.ago)
+        create(:offer, status: "applied", applied_date: Date.current)
+        get "/api/v1/offers", params: { needs_followup: "true" }
+
+        body = JSON.parse(response.body)
+        expect(body.map { |o| o["id"] }).to contain_exactly(stale.id)
+      end
+    end
+
+    it "includes the needs_followup flag on each offer" do
+      create(:offer)
+      get "/api/v1/offers"
+
+      body = JSON.parse(response.body)
+      expect(body.first).to have_key("needs_followup")
     end
 
     describe "sorting" do

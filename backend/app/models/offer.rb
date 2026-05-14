@@ -3,6 +3,10 @@ class Offer < ApplicationRecord
   MODALITIES = %w[presencial hibrido remoto].freeze
   SORTABLE = %w[match_score found_date posted_date company title].freeze
 
+  # An "applied" offer left untouched for this many days is surfaced as
+  # needing a follow-up nudge.
+  FOLLOWUP_DAYS = 7
+
   # Valid forward transitions. Any status can transition to `archived` via
   # archive!. `rejected` is terminal except for archiving.
   TRANSITIONS = {
@@ -34,8 +38,14 @@ class Offer < ApplicationRecord
   scope :active,   -> { where(archived: false) }
   scope :pipeline, -> { active.where.not(status: %w[rejected]) }
   scope :recent,   ->(days = 7) { where(found_date: days.days.ago..) }
+  # Applications sitting in "applied" past the follow-up window.
+  scope :needs_followup, lambda {
+    active.where(status: "applied")
+          .where(applied_date: ..FOLLOWUP_DAYS.days.ago.to_date)
+  }
 
   before_validation :set_defaults, on: :create
+  before_save :stamp_applied_date
 
   # Move the offer through the status state machine. Validates the
   # transition is allowed by TRANSITIONS, records a StatusChange, and
@@ -63,11 +73,33 @@ class Offer < ApplicationRecord
     end
   end
 
+  # True when this is an "applied" offer that has gone quiet — the UI
+  # uses it to nudge the user to follow up. Mirrors the needs_followup scope.
+  def needs_followup
+    !archived &&
+      status == "applied" &&
+      applied_date.present? &&
+      applied_date <= FOLLOWUP_DAYS.days.ago.to_date
+  end
+
+  # Always expose the computed needs_followup flag in JSON, on top of
+  # whatever methods/includes the caller asked for.
+  def as_json(options = {})
+    super(options.merge(methods: Array(options[:methods]) | [ :needs_followup ]))
+  end
+
   private
 
   def set_defaults
     self.status ||= "new"
     self.found_date ||= Date.current
     self.stack ||= []
+  end
+
+  # Record when an offer first entered "applied" so the follow-up nudge
+  # has a date to count from. Fires on any save that changes status —
+  # the state-machine path (transition_to!) and a direct form edit alike.
+  def stamp_applied_date
+    self.applied_date ||= Date.current if status == "applied" && status_changed?
   end
 end

@@ -34,6 +34,9 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
   const setArchived = (on: boolean) =>
     onChange({ ...filters, include_archived: on || undefined, page: 1 });
 
+  const setNeedsFollowup = (on: boolean) =>
+    onChange({ ...filters, needs_followup: on || undefined, page: 1 });
+
   const setSource = (id: number | undefined) =>
     onChange({ ...filters, source_id: id, page: 1 });
 
@@ -47,7 +50,8 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
     (filters.match_score_gte ? 1 : 0) +
     (filters.match_score_lte ? 1 : 0) +
     (filters.location ? 1 : 0) +
-    (filters.include_archived ? 1 : 0);
+    (filters.include_archived ? 1 : 0) +
+    (filters.needs_followup ? 1 : 0);
 
   const sourcesWithOffers = (sources ?? []).filter((s) => s.count > 0);
 
@@ -214,7 +218,16 @@ export const FiltersPanel = ({ filters, onChange }: Props) => {
         />
       </section>
 
-      <section className="border-t border-edge pt-3">
+      <section className="space-y-2 border-t border-edge pt-3">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-ink-soft">
+          <input
+            type="checkbox"
+            checked={Boolean(filters.needs_followup)}
+            onChange={(e) => setNeedsFollowup(e.target.checked)}
+            className="h-3.5 w-3.5 rounded border-edge-strong text-accent focus:ring-accent"
+          />
+          Precisa de follow-up
+        </label>
         <label className="flex cursor-pointer items-center gap-2 text-xs text-ink-soft">
           <input
             type="checkbox"

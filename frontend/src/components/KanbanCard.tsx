@@ -56,10 +56,18 @@ export const KanbanCard = ({ offer, onClick }: Props) => {
           )}
         </ul>
       )}
-      <footer className="mt-3 flex items-center justify-between text-[10px] text-ink-muted">
+      <footer className="mt-3 flex items-center gap-1.5 text-[10px] text-ink-muted">
         {offer.match_score && (
           <span className="rounded-md bg-amber-50 px-1.5 py-0.5 text-amber-800 dark:bg-amber-950 dark:text-amber-200">
             ★ {offer.match_score}/5
+          </span>
+        )}
+        {offer.needs_followup && (
+          <span
+            className="rounded-md bg-amber-100 px-1.5 py-0.5 font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+            title="Candidatura sem novidades — altura de dar seguimento"
+          >
+            Follow-up
           </span>
         )}
         <span className="ml-auto">{offer.found_date}</span>

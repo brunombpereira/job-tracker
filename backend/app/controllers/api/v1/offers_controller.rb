@@ -180,6 +180,7 @@ module Api
         scope = scope.where("match_score <= ?", params[:match_score_lte]) if params[:match_score_lte].present?
         scope = scope.where("location ILIKE ?", "%#{params[:location]}%") if params[:location].present?
         scope = scope.where(source_id: params[:source_id]) if params[:source_id].present?
+        scope = scope.needs_followup if params[:needs_followup] == "true"
         if params[:search].present?
           q = "%#{params[:search]}%"
           scope = scope.where("title ILIKE :q OR company ILIKE :q OR description ILIKE :q", q: q)

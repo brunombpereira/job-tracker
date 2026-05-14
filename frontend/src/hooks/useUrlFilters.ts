@@ -60,6 +60,7 @@ export function parseSearchParams(params: URLSearchParams): UrlState {
   if (perPage) filters.per_page = Number(perPage);
 
   if (params.get("include_archived") === "true") filters.include_archived = true;
+  if (params.get("needs_followup") === "true") filters.needs_followup = true;
 
   const view = params.get("view") === "kanban" ? "kanban" : "list";
 
@@ -82,6 +83,7 @@ export function toSearchParams(state: UrlState): URLSearchParams {
   if (f.page && f.page !== 1) p.set("page", String(f.page));
   if (f.per_page && f.per_page !== 24) p.set("per_page", String(f.per_page));
   if (f.include_archived) p.set("include_archived", "true");
+  if (f.needs_followup) p.set("needs_followup", "true");
   if (state.view === "kanban") p.set("view", "kanban");
 
   return p;

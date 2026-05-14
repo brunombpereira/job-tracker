@@ -14,6 +14,7 @@ const buildParams = (filters: OfferFilters) => {
   if (filters.page) params.page = filters.page;
   if (filters.per_page) params.per_page = filters.per_page;
   if (filters.include_archived) params.include_archived = "true";
+  if (filters.needs_followup) params.needs_followup = "true";
   return params;
 };
 

@@ -122,6 +122,14 @@ export const OfferCard = ({ offer, onEdit, onOpen }: Props) => {
                 {offer.modality}
               </span>
             )}
+            {offer.needs_followup && (
+              <span
+                className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-200"
+                title={`Candidatura de ${offer.applied_date} sem novidades — altura de dar seguimento`}
+              >
+                Follow-up
+              </span>
+            )}
           </div>
         </div>
         <StatusBadge status={offer.status} />

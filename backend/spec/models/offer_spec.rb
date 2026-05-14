@@ -37,6 +37,70 @@ RSpec.describe Offer, type: :model do
     it ".active excludes archived" do
       expect(described_class.active).to contain_exactly(active_offer)
     end
+
+    describe ".needs_followup" do
+      it "includes applied offers past the follow-up window" do
+        stale = create(:offer, status: "applied",
+                               applied_date: (described_class::FOLLOWUP_DAYS + 1).days.ago)
+        expect(described_class.needs_followup).to include(stale)
+      end
+
+      it "excludes applied offers still inside the window" do
+        fresh = create(:offer, status: "applied", applied_date: Date.current)
+        expect(described_class.needs_followup).not_to include(fresh)
+      end
+
+      it "excludes offers that have moved past 'applied'" do
+        moved = create(:offer, status: "interview",
+                               applied_date: 30.days.ago)
+        expect(described_class.needs_followup).not_to include(moved)
+      end
+
+      it "excludes archived offers" do
+        archived = create(:offer, status: "applied", archived: true,
+                                  applied_date: 30.days.ago)
+        expect(described_class.needs_followup).not_to include(archived)
+      end
+    end
+  end
+
+  describe "applied_date stamping" do
+    it "stamps applied_date when an offer enters 'applied' via transition_to!" do
+      offer = create(:offer, status: "new")
+      expect { offer.transition_to!("applied") }
+        .to change { offer.reload.applied_date }.from(nil).to(Date.current)
+    end
+
+    it "stamps applied_date when status is set to 'applied' directly" do
+      offer = create(:offer, status: "new")
+      offer.update!(status: "applied")
+      expect(offer.reload.applied_date).to eq(Date.current)
+    end
+
+    it "does not overwrite an applied_date that is already set" do
+      earlier = 10.days.ago.to_date
+      offer = create(:offer, status: "applied", applied_date: earlier)
+      offer.transition_to!("interview")
+      expect(offer.reload.applied_date).to eq(earlier)
+    end
+  end
+
+  describe "#needs_followup" do
+    it "is true for a stale applied offer" do
+      offer = build(:offer, status: "applied",
+                            applied_date: (described_class::FOLLOWUP_DAYS + 1).days.ago)
+      expect(offer.needs_followup).to be(true)
+    end
+
+    it "is false for a recently applied offer" do
+      offer = build(:offer, status: "applied", applied_date: Date.current)
+      expect(offer.needs_followup).to be(false)
+    end
+
+    it "is exposed in the JSON representation" do
+      offer = build(:offer, status: "applied", applied_date: Date.current)
+      expect(offer.as_json).to have_key("needs_followup")
+    end
   end
 
   describe "#transition_to!" do

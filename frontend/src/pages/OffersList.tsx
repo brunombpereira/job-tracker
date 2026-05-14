@@ -38,7 +38,8 @@ const countActiveFilters = (f: OfferFilters) =>
   (f.match_score_gte ? 1 : 0) +
   (f.match_score_lte ? 1 : 0) +
   (f.location ? 1 : 0) +
-  (f.include_archived ? 1 : 0);
+  (f.include_archived ? 1 : 0) +
+  (f.needs_followup ? 1 : 0);
 
 export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
   const { filters, setFilters, view, setView, searchInput, setSearchInput } =

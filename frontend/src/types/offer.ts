@@ -32,6 +32,8 @@ export interface Offer {
   applied_date: string | null;
   description: string | null;
   archived: boolean;
+  /** Computed server-side: an "applied" offer gone quiet past the follow-up window. */
+  needs_followup: boolean;
   source: Source | null;
 }
 
@@ -47,6 +49,7 @@ export interface OfferFilters {
   page?: number;
   per_page?: number;
   include_archived?: boolean;
+  needs_followup?: boolean;
 }
 
 export interface Note {
