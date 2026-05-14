@@ -1,5 +1,34 @@
 import { api } from "./client";
 
+/** The editable profile — personal details + match-scoring keyword lists. */
+export interface Profile {
+  name: string | null;
+  city: string | null;
+  country: string | null;
+  email: string | null;
+  phone: string | null;
+  github: string | null;
+  linkedin: string | null;
+  start_date: string | null;
+  primary_keywords: string[];
+  secondary_keywords: string[];
+  experimental_keywords: string[];
+  positive_title_keywords: string[];
+  negative_title_keywords: string[];
+  location_bonus_keywords: string[];
+  linkedin_keywords: string[];
+}
+
+export const getProfile = async (): Promise<Profile> => {
+  const res = await api.get<Profile>("/profile");
+  return res.data;
+};
+
+export const updateProfile = async (data: Partial<Profile>): Promise<Profile> => {
+  const res = await api.patch<Profile>("/profile", { profile: data });
+  return res.data;
+};
+
 export interface ProfileFiles {
   name: string;
   city: string;

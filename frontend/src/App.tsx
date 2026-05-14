@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { OffersList } from "@/pages/OffersList";
 import { Search } from "@/pages/Search";
+import { Settings } from "@/pages/Settings";
 import { AppHeader, type Tab } from "@/components/AppHeader";
 
 const readInitialTab = (): Tab => {
   if (typeof window === "undefined") return "offers";
   const t = new URLSearchParams(window.location.search).get("tab");
-  return t === "search" ? "search" : "offers";
+  if (t === "search" || t === "settings") return t;
+  return "offers";
 };
 
 export default function App() {
@@ -33,6 +35,21 @@ export default function App() {
         />
         <main className="container mx-auto max-w-7xl px-4 py-8">
           <Search />
+        </main>
+      </div>
+    );
+  }
+
+  if (tab === "settings") {
+    return (
+      <div className="min-h-screen bg-surface">
+        <AppHeader
+          tab={tab}
+          onTabChange={setTab}
+          subtitle="Perfil e definições"
+        />
+        <main className="container mx-auto max-w-3xl px-4 py-8">
+          <Settings />
         </main>
       </div>
     );
