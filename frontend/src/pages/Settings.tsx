@@ -80,6 +80,8 @@ const toPayload = (f: FormState): Partial<Profile> => {
 const inputClass =
   "block w-full rounded-lg border border-edge-strong bg-surface-raised px-3 py-2 text-sm text-ink placeholder:text-ink-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft";
 
+const cardClass = "rounded-xl border border-edge bg-surface-raised p-5 shadow-soft sm:p-6";
+
 export const Settings = () => {
   const { data, isLoading, error } = useProfile();
   const { data: files } = useProfileFiles();
@@ -116,14 +118,14 @@ export const Settings = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <form onSubmit={onSubmit} className="space-y-8">
-        <section>
+    <div className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6">
+        <section className={cardClass}>
           <h2 className="font-serif text-lg text-ink">Dados pessoais</h2>
           <p className="mt-0.5 text-xs text-ink-muted">
             Preenchem os campos das cartas de apresentação geradas.
           </p>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
             {DETAIL_FIELDS.map(({ key, label, placeholder }) => (
               <label key={key} className="block">
                 <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
@@ -138,36 +140,35 @@ export const Settings = () => {
           </div>
         </section>
 
-        <section>
+        <section className={cardClass}>
           <h2 className="font-serif text-lg text-ink">Match score &amp; pesquisa</h2>
           <p className="mt-0.5 text-xs text-ink-muted">
             Listas separadas por vírgulas. Afinam o match score das ofertas e as
             pesquisas automáticas no LinkedIn.
           </p>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 grid gap-x-4 gap-y-4 sm:grid-cols-2">
             {KEYWORD_FIELDS.map(({ key, label, hint }) => (
               <label key={key} className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">
-                  {label} <span className="font-normal text-ink-muted">— {hint}</span>
-                </span>
+                <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
                 <input value={form[key] ?? ""} onChange={set(key)} className={inputClass} />
+                <span className="mt-1 block text-xs text-ink-muted">{hint}</span>
               </label>
             ))}
           </div>
         </section>
 
-        <div className="flex justify-end border-t border-edge pt-4">
+        <div className="flex justify-end">
           <button
             type="submit"
             disabled={update.isPending}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep disabled:opacity-50"
+            className="rounded-lg bg-accent px-5 py-2 text-sm font-medium text-white shadow-soft transition hover:bg-accent-deep disabled:opacity-50"
           >
             {update.isPending ? "A guardar…" : "Guardar perfil"}
           </button>
         </div>
       </form>
 
-      <section>
+      <section className={cardClass}>
         <h2 className="font-serif text-lg text-ink">Documentos</h2>
         <p className="mt-0.5 text-xs text-ink-muted">
           CVs e modelos de carta de apresentação. Guardados na base de dados —
@@ -179,7 +180,7 @@ export const Settings = () => {
             return (
               <div
                 key={kind}
-                className="flex items-center justify-between gap-3 rounded-lg border border-edge-strong bg-surface-raised px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-lg border border-edge-strong bg-surface px-3 py-2"
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm text-ink">{label}</p>
