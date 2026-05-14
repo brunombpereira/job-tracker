@@ -41,9 +41,9 @@ module Scrapers
 
     # WWR titles look like "Company Name: Senior Backend Engineer"
     def split_title(raw)
-      return [raw.to_s.strip, nil] if raw.blank?
+      return [ raw.to_s.strip, nil ] if raw.blank?
       parts = raw.to_s.split(/:\s+/, 2)
-      parts.size == 2 ? [parts[1].strip, parts[0].strip] : [raw.to_s.strip, nil]
+      parts.size == 2 ? [ parts[1].strip, parts[0].strip ] : [ raw.to_s.strip, nil ]
     end
   end
 end

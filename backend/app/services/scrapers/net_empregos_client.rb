@@ -105,7 +105,7 @@ module Scrapers
         date:     lis[0],
         location: lis[1],
         category: lis[2],
-        company:  lis[3],
+        company:  lis[3]
       }
     end
 

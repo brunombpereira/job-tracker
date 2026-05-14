@@ -55,7 +55,7 @@ module Scrapers
         modality:    "presencial",
         url:         raw[:url],
         description: raw[:role_tag].present? ? "Categoria: #{raw[:role_tag]}" : nil,
-        stack:       raw[:role_tag] ? [raw[:role_tag]] : [],
+        stack:       raw[:role_tag] ? [ raw[:role_tag] ] : [],
         status:      "new"
       }
     rescue StandardError

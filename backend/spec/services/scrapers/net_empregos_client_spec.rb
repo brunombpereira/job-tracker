@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Scrapers::NetEmpregosClient do
   # Two-item HTML fixture matching the live `.job-item` template.
-  def page_html(ids = [1])
+  def page_html(ids = [ 1 ])
     items = ids.map do |id|
       <<~ITEM
         <div class="job-item media">
@@ -35,8 +35,8 @@ RSpec.describe Scrapers::NetEmpregosClient do
       .to_return do |req|
         page = req.uri.query_values["page"]&.to_i || 1
         case page
-        when 1 then { status: 200, body: page_html([1, 2, 3]) }
-        when 2 then { status: 200, body: page_html([4, 5]) }
+        when 1 then { status: 200, body: page_html([ 1, 2, 3 ]) }
+        when 2 then { status: 200, body: page_html([ 4, 5 ]) }
         else        { status: 200, body: "<html><body></body></html>" }
         end
       end

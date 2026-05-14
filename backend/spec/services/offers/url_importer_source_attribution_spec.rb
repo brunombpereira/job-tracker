@@ -8,7 +8,7 @@ RSpec.describe Offers::UrlImporter, "source attribution" do
       "title"        => "Backend Engineer",
       "hiringOrganization" => { "name" => "Acme" },
       "description"  => "Build stuff.",
-      "datePosted"   => "2026-05-10",
+      "datePosted"   => "2026-05-10"
     }.to_json
     "<html><script type='application/ld+json'>#{body}</script></html>"
   end
@@ -29,7 +29,7 @@ RSpec.describe Offers::UrlImporter, "source attribution" do
   it "attributes Indeed (any country subdomain) to a single 'Indeed' Source" do
     pt_url = "https://pt.indeed.com/viewjob?jk=abcd1"
     uk_url = "https://uk.indeed.com/viewjob?jk=abcd2"
-    [pt_url, uk_url].each { |u| stub_request(:get, u).to_return(status: 200, body: html_with_jsonld.gsub("abcd1", SecureRandom.hex(4))) }
+    [ pt_url, uk_url ].each { |u| stub_request(:get, u).to_return(status: 200, body: html_with_jsonld.gsub("abcd1", SecureRandom.hex(4))) }
 
     described_class.import(pt_url)
     described_class.import(uk_url)

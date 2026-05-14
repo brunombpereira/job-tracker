@@ -11,7 +11,7 @@ module Api
         end
 
         by_source = Source.left_outer_joins(:offers)
-                          .where(offers: { archived: [false, nil] })
+                          .where(offers: { archived: [ false, nil ] })
                           .group("sources.id", "sources.name")
                           .order("sources.name")
                           .count("offers.id")

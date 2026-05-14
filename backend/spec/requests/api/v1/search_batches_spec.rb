@@ -6,14 +6,14 @@ RSpec.describe "Api::V1::SearchBatches", type: :request do
   describe "POST /api/v1/search_batches" do
     let(:remotive_body) do
       {
-        "jobs" => [{
+        "jobs" => [ {
           "title"        => "Junior Ruby Developer",
           "company_name" => "Acme",
           "candidate_required_location" => "Worldwide",
           "url"          => "https://remotive.com/remote-jobs/acme-1",
           "description"  => "Build great APIs.",
           "publication_date" => "2026-05-13T10:00:00Z"
-        }]
+        } ]
       }.to_json
     end
 
@@ -32,13 +32,13 @@ RSpec.describe "Api::V1::SearchBatches", type: :request do
 
     it "creates a batch with only the requested sources and runs them" do
       perform_enqueued_jobs do
-        post "/api/v1/search_batches", params: { sources: ["remotive"] }, as: :json
+        post "/api/v1/search_batches", params: { sources: [ "remotive" ] }, as: :json
       end
 
       expect(response).to have_http_status(:accepted)
       body = JSON.parse(response.body)
       expect(body).to include("id", "status", "sources_requested")
-      expect(body["sources_requested"]).to eq(["remotive"])
+      expect(body["sources_requested"]).to eq([ "remotive" ])
 
       batch = SearchBatch.find(body["id"]).reload
       expect(batch.scraper_runs.size).to eq(1)
@@ -48,14 +48,14 @@ RSpec.describe "Api::V1::SearchBatches", type: :request do
     end
 
     it "rejects unknown source names with 422" do
-      post "/api/v1/search_batches", params: { sources: ["bogus"] }, as: :json
+      post "/api/v1/search_batches", params: { sources: [ "bogus" ] }, as: :json
       expect(response).to have_http_status(:unprocessable_entity)
       expect(JSON.parse(response.body)["error"]).to match(/Unknown sources/)
     end
 
     it "uses registry default_params when none are supplied" do
       perform_enqueued_jobs do
-        post "/api/v1/search_batches", params: { sources: ["remotive"] }, as: :json
+        post "/api/v1/search_batches", params: { sources: [ "remotive" ] }, as: :json
       end
       run = SearchBatch.last.scraper_runs.first
       expect(run.params).to include("category" => "software-dev")
@@ -64,7 +64,7 @@ RSpec.describe "Api::V1::SearchBatches", type: :request do
     it "honors per-source override params" do
       perform_enqueued_jobs do
         post "/api/v1/search_batches",
-             params: { sources: ["remotive"], params_by_source: { remotive: { category: "devops" } } },
+             params: { sources: [ "remotive" ], params_by_source: { remotive: { category: "devops" } } },
              as: :json
       end
       run = SearchBatch.last.scraper_runs.first

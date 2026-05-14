@@ -48,7 +48,7 @@ RSpec.describe Scrapers::TeamlyzerClient do
     senior = Offer.find_by(url: "https://pt.teamlyzer.com/companies/get-job/a15a532a-440f-456d-8dee-1417f6ef1af3?v=jobboard")
     expect(senior.title).to eq("Junior software engineer")
     expect(senior.company).to eq("Intellias")
-    expect(senior.stack).to eq(["Backend"])
+    expect(senior.stack).to eq([ "Backend" ])
   end
 
   it "filters by keywords on title/company" do

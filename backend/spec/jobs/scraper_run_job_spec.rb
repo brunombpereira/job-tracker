@@ -4,14 +4,14 @@ RSpec.describe ScraperRunJob, type: :job do
   describe "#perform" do
     let(:remotive_body) do
       {
-        "jobs" => [{
+        "jobs" => [ {
           "title"        => "Junior Ruby Developer",
           "company_name" => "Acme",
           "candidate_required_location" => "Worldwide",
           "url"          => "https://remotive.com/remote-jobs/acme-1",
           "description"  => "Build great APIs.",
           "publication_date" => "2026-05-13T10:00:00Z"
-        }]
+        } ]
       }
     end
 

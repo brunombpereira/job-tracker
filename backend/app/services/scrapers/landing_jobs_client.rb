@@ -52,7 +52,7 @@ module Scrapers
 
     def format_location(locations)
       Array(locations)
-        .map { |l| [l["city"], l["country_code"]].compact.join(", ") }
+        .map { |l| [ l["city"], l["country_code"] ].compact.join(", ") }
         .reject(&:empty?)
         .join(" / ")
         .presence
@@ -63,10 +63,9 @@ module Scrapers
       return nil unless lo || hi
       cur = raw["currency_code"].to_s.presence || "EUR"
       sym = cur == "EUR" ? "€" : "#{cur} "
-      [lo, hi].compact.map { |n| "#{sym}#{Integer(n) / 1000}k" }.join("–")
+      [ lo, hi ].compact.map { |n| "#{sym}#{Integer(n) / 1000}k" }.join("–")
     rescue StandardError
       nil
     end
-
   end
 end

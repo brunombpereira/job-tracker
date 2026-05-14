@@ -7,7 +7,7 @@ RSpec.describe Scorers::ProfileMatcher do
         title:       "Backend Developer",
         description: "Build Rails apps with PostgreSQL and React.",
         stack:       %w[Ruby Rails PostgreSQL],
-        location:    nil,
+        location:    nil
       }
       expect(described_class.score(attrs)).to be >= 4
     end
@@ -16,8 +16,8 @@ RSpec.describe Scorers::ProfileMatcher do
       attrs = {
         title:       "Junior Backend Developer",
         description: "Build with Ruby.",
-        stack:       ["Ruby"],
-        location:    nil,
+        stack:       [ "Ruby" ],
+        location:    nil
       }
       expect(described_class.score(attrs)).to be >= 4
     end
@@ -26,9 +26,9 @@ RSpec.describe Scorers::ProfileMatcher do
       pt_remote = {
         title: "Backend Developer",
         description: "Ruby work.",
-        stack: ["Ruby"],
+        stack: [ "Ruby" ],
         location: "Porto, Portugal",
-        modality: "remoto",
+        modality: "remoto"
       }
       foreign = pt_remote.merge(location: "Mumbai, India", modality: "presencial")
       expect(described_class.score(pt_remote)).to be > described_class.score(foreign)
@@ -39,7 +39,7 @@ RSpec.describe Scorers::ProfileMatcher do
         title:       "Construction Worker",
         description: "Bricklayer needed in Aveiro.",
         stack:       [],
-        location:    "Aveiro",
+        location:    "Aveiro"
       }
       # No primary/secondary/experimental hit → -1; location_bonus +1; net=3-1+1=3
       expect(described_class.score(generic)).to be <= 3
@@ -51,7 +51,7 @@ RSpec.describe Scorers::ProfileMatcher do
         description: "Ruby on Rails, React, TypeScript, PostgreSQL, all day every day.",
         stack:       %w[Ruby Rails React PostgreSQL TypeScript JavaScript Tailwind],
         location:    "Aveiro, Portugal",
-        modality:    "remoto",
+        modality:    "remoto"
       }
       expect(described_class.score(jackpot)).to eq(5)
     end
@@ -60,8 +60,8 @@ RSpec.describe Scorers::ProfileMatcher do
       mid = {
         title:       "Mid-level Backend Developer",
         description: "5+ years of Rails experience.",
-        stack:       ["Ruby", "Rails"],
-        location:    nil,
+        stack:       [ "Ruby", "Rails" ],
+        location:    nil
       }
       # 3 + 2 (primary) - 1 (negative title) = 4
       expect(described_class.score(mid)).to eq(4)

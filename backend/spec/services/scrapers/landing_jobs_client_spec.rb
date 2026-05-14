@@ -16,7 +16,7 @@ RSpec.describe Scrapers::LandingJobsClient do
         "gross_salary_high" => 73000,
         "currency_code"     => "EUR",
         "tags"     => %w[Azure CI/CD Python],
-        "locations" => [{ "city" => "Lisbon", "country_code" => "PT" }]
+        "locations" => [ { "city" => "Lisbon", "country_code" => "PT" } ]
       },
       {
         "id"           => 19020,

@@ -18,7 +18,7 @@ RSpec.describe Scrapers::BaseClient do
         [
           { title: "Backend Developer",  url: "https://ex.com/1" },
           { title: "Frontend Developer", url: "https://ex.com/2" },
-          { title: "No URL Job",         url: "" },
+          { title: "No URL Job",         url: "" }
         ]
       end
     end
@@ -41,7 +41,7 @@ RSpec.describe Scrapers::BaseClient do
   describe "auto match_score assignment" do
     it "applies ProfileMatcher when match_score is missing" do
       client = self.class.make_client("fake_score") do
-        [{ title: "Junior Ruby Developer", url: "https://ex.com/score", stack: %w[Ruby Rails] }]
+        [ { title: "Junior Ruby Developer", url: "https://ex.com/score", stack: %w[Ruby Rails] } ]
       end
       client.run
       offer = Offer.find_by(url: "https://ex.com/score")
@@ -52,7 +52,7 @@ RSpec.describe Scrapers::BaseClient do
       client = Class.new(Scrapers::BaseClient).tap do |k|
         k.const_set(:SOURCE_NAME, "fake_preset")
         k.const_set(:SOURCE_COLOR, "#000")
-        k.define_method(:fetch_raw) { |_| [{ title: "X", url: "https://ex.com/preset" }] }
+        k.define_method(:fetch_raw) { |_| [ { title: "X", url: "https://ex.com/preset" } ] }
         k.define_method(:normalize) { |raw| raw.merge(company: "Acme", status: "new", match_score: 2) }
       end
       client.run

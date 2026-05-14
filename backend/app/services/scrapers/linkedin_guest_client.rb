@@ -24,7 +24,7 @@ module Scrapers
     TIME_FILTERS = {
       "day"   => "r86400",
       "week"  => "r604800",
-      "month" => "r2592000",
+      "month" => "r2592000"
     }.freeze
 
     def fetch_raw(params)
@@ -104,7 +104,7 @@ module Scrapers
         company:     card.at_css(".base-search-card__subtitle a, .base-search-card__subtitle")&.text&.strip,
         location:    card.at_css(".job-search-card__location")&.text&.strip&.presence,
         url:         strip_tracking(url),
-        posted_date: parse_date(card.at_css("time")&.[]("datetime")),
+        posted_date: parse_date(card.at_css("time")&.[]("datetime"))
       }
     end
 

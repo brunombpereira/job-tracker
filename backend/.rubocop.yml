@@ -1,0 +1,7 @@
+# Omakase Ruby styling for Rails. The rubocop-rails-omakase gem ships the
+# actual rule set; this file just activates it (matching what `rails new`
+# generates). Without it RuboCop falls back to its strict defaults.
+inherit_gem: { rubocop-rails-omakase: rubocop.yml }
+
+AllCops:
+  SuggestExtensions: false

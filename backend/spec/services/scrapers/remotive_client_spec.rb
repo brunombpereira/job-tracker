@@ -36,7 +36,7 @@ RSpec.describe Scrapers::RemotiveClient do
       .to change(Offer, :count).by(2)
 
     expect(result).to include(found: 2, created: 2, skipped: 0)
-    expect(Offer.pluck(:modality).uniq).to eq(["remoto"])
+    expect(Offer.pluck(:modality).uniq).to eq([ "remoto" ])
   end
 
   it "passes the salary string through when present" do

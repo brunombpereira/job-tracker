@@ -3,7 +3,7 @@ class CreateScraperRuns < ActiveRecord::Migration[7.1]
     create_table :scraper_runs do |t|
       t.string  :source_name, null: false # "adzuna", "itjobs", ...
       t.string  :status,      null: false, default: "pending"
-        # pending | running | succeeded | failed
+      # pending | running | succeeded | failed
       t.integer :offers_found,   null: false, default: 0
       t.integer :offers_created, null: false, default: 0
       t.integer :offers_skipped, null: false, default: 0

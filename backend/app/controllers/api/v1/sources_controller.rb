@@ -12,7 +12,7 @@ module Api
             id:    s.id,
             name:  s.name,
             color: s.color,
-            count: counts[s.id] || 0,
+            count: counts[s.id] || 0
           }
         end
         render json: rows

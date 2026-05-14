@@ -49,7 +49,7 @@ module Scorers
 
     def score
       s = 3
-      s += [primary_hits, 2].min
+      s += [ primary_hits, 2 ].min
       s += 1 if positive_title?
       s += 1 if location_bonus?
       s -= 1 if no_signal?
@@ -72,7 +72,7 @@ module Scorers
     end
 
     def location_bonus?
-      blob = [@attrs[:location], @attrs[:modality]].compact.join(" ").downcase
+      blob = [ @attrs[:location], @attrs[:modality] ].compact.join(" ").downcase
       list("location_bonus").any? { |kw| blob.include?(kw.to_s.downcase) }
     end
 
@@ -113,7 +113,7 @@ module Scorers
     end
 
     def text_blob
-      @text_blob ||= [@attrs[:title], @attrs[:description]].compact.join(" ").downcase
+      @text_blob ||= [ @attrs[:title], @attrs[:description] ].compact.join(" ").downcase
     end
 
     def list(key)
