@@ -129,7 +129,7 @@ export const Search = () => {
         {isLoading ? (
           <p className="text-sm text-ink-muted">A carregar…</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             {sources.map((s) => (
               <SourceCard
                 key={s.key}

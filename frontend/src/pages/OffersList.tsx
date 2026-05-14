@@ -151,7 +151,7 @@ export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
         }
       />
 
-      <main className="container mx-auto max-w-7xl px-4 py-8">
+      <main className="mx-auto max-w-[110rem] px-4 py-8">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             type="search"
@@ -222,7 +222,7 @@ export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
 
             {!isLoading && offers.length > 0 && view === "list" && (
               <>
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {offers.map((offer) => (
                     <OfferCard
                       key={offer.id}
