@@ -33,7 +33,7 @@ export default function App() {
           onTabChange={setTab}
           subtitle="Procura automática de ofertas"
         />
-        <main className="px-4 py-8">
+        <main className="px-4 py-8 sm:px-6 lg:px-8">
           <Search />
         </main>
       </div>
@@ -48,7 +48,7 @@ export default function App() {
           onTabChange={setTab}
           subtitle="Perfil e definições"
         />
-        <main className="mx-auto max-w-5xl px-4 py-8">
+        <main className="px-4 py-8 sm:px-6 lg:px-8">
           <Settings />
         </main>
       </div>

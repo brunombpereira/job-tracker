@@ -120,42 +120,44 @@ export const Settings = () => {
   return (
     <div className="space-y-6">
       <form onSubmit={onSubmit} className="space-y-6">
-        <section className={cardClass}>
-          <h2 className="font-serif text-lg text-ink">Dados pessoais</h2>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Preenchem os campos das cartas de apresentação geradas.
-          </p>
-          <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
-            {DETAIL_FIELDS.map(({ key, label, placeholder }) => (
-              <label key={key} className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
-                <input
-                  value={form[key] ?? ""}
-                  onChange={set(key)}
-                  placeholder={placeholder}
-                  className={inputClass}
-                />
-              </label>
-            ))}
-          </div>
-        </section>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <section className={cardClass}>
+            <h2 className="font-serif text-lg text-ink">Dados pessoais</h2>
+            <p className="mt-0.5 text-xs text-ink-muted">
+              Preenchem os campos das cartas de apresentação geradas.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3 sm:grid-cols-2">
+              {DETAIL_FIELDS.map(({ key, label, placeholder }) => (
+                <label key={key} className="block">
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+                  <input
+                    value={form[key] ?? ""}
+                    onChange={set(key)}
+                    placeholder={placeholder}
+                    className={inputClass}
+                  />
+                </label>
+              ))}
+            </div>
+          </section>
 
-        <section className={cardClass}>
-          <h2 className="font-serif text-lg text-ink">Match score &amp; pesquisa</h2>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Listas separadas por vírgulas. Afinam o match score das ofertas e as
-            pesquisas automáticas no LinkedIn.
-          </p>
-          <div className="mt-4 grid gap-x-4 gap-y-4 sm:grid-cols-2">
-            {KEYWORD_FIELDS.map(({ key, label, hint }) => (
-              <label key={key} className="block">
-                <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
-                <input value={form[key] ?? ""} onChange={set(key)} className={inputClass} />
-                <span className="mt-1 block text-xs text-ink-muted">{hint}</span>
-              </label>
-            ))}
-          </div>
-        </section>
+          <section className={cardClass}>
+            <h2 className="font-serif text-lg text-ink">Match score &amp; pesquisa</h2>
+            <p className="mt-0.5 text-xs text-ink-muted">
+              Listas separadas por vírgulas. Afinam o match score das ofertas e as
+              pesquisas automáticas no LinkedIn.
+            </p>
+            <div className="mt-4 grid gap-x-4 gap-y-4 sm:grid-cols-2">
+              {KEYWORD_FIELDS.map(({ key, label, hint }) => (
+                <label key={key} className="block">
+                  <span className="mb-1 block text-xs font-medium text-ink-soft">{label}</span>
+                  <input value={form[key] ?? ""} onChange={set(key)} className={inputClass} />
+                  <span className="mt-1 block text-xs text-ink-muted">{hint}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+        </div>
 
         <div className="flex justify-end">
           <button
@@ -174,7 +176,7 @@ export const Settings = () => {
           CVs e modelos de carta de apresentação. Guardados na base de dados —
           aplicados assim que carregas o ficheiro.
         </p>
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {DOCUMENT_SLOTS.map(({ kind, label }) => {
             const status = documentStatus(files, kind);
             return (

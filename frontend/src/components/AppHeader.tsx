@@ -16,7 +16,7 @@ interface Props {
 export function AppHeader({ tab, onTabChange, actions, subtitle }: Props) {
   return (
     <header className="border-b border-edge bg-surface-raised">
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 px-4 py-4 sm:px-6 lg:px-8">
         {/* Brand + navigation — anchored left, never moves between views. */}
         <div className="flex items-center gap-4 sm:gap-6">
           <div>
