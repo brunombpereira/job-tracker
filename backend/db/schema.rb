@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_15_120001) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_16_120001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -41,6 +41,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_15_120001) do
     t.bigint "source_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "score_source", default: "auto", null: false
     t.index ["found_date"], name: "index_offers_on_found_date"
     t.index ["match_score"], name: "index_offers_on_match_score"
     t.index ["source_id"], name: "index_offers_on_source_id"

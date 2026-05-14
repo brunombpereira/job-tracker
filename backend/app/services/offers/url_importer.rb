@@ -51,11 +51,25 @@ module Offers
       attrs = extract_attrs(html)
       raise ImportError, "Não encontrei JobPosting nem OpenGraph nesta página" if attrs.blank?
 
-      source = source_for_host
-      Offer.create!(attrs.merge(url: @url, status: "new", source_id: source.id))
+      result = Offers::Ingest.call(
+        attrs.merge(url: @url, status: "new"),
+        source: source_for_host
+      )
+      return result.offer if result.created?
+
+      raise ImportError, ingest_error_message(result)
     end
 
     private
+
+    def ingest_error_message(result)
+      case result.outcome
+      when :skipped_duplicate
+        "Esta oferta já existe"
+      else
+        result.errors.join(", ").presence || "Não foi possível importar a oferta"
+      end
+    end
 
     # Map well-known job-board hostnames onto pretty display names + brand
     # colors so the FiltersPanel chip and SourceCard render meaningfully

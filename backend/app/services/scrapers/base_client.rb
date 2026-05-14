@@ -31,20 +31,15 @@ module Scrapers
       raws   = fetch_raw(params)
       attrs  = raws.map { |r| normalize(r) }.compact
 
-      created = 0
-      skipped = 0
-      attrs.each do |a|
-        next skipped += 1 if a[:url].blank?
-        next skipped += 1 if Offer.exists?(url: a[:url])
-
-        a[:match_score] ||= Scorers::ProfileMatcher.score(a)
-        Offer.create!(a.merge(source_id: source.id))
-        created += 1
-      rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique
-        skipped += 1
+      results = attrs.map do |a|
+        Offers::Ingest.call(a, source: source, score: true, skip_blank_url: true)
       end
 
-      { found: attrs.size, created: created, skipped: skipped }
+      {
+        found:   attrs.size,
+        created: results.count(&:created?),
+        skipped: results.count { |r| !r.created? }
+      }
     end
 
     # Hooks for subclasses

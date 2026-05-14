@@ -40,13 +40,13 @@ module Api
 
       # POST /api/v1/offers
       def create
-        offer = Offer.create!(offer_params)
+        offer = Offer.create!(offer_attrs)
         render json: offer, status: :created
       end
 
       # PATCH /api/v1/offers/:id
       def update
-        @offer.update!(offer_params)
+        @offer.update!(offer_attrs)
         render json: @offer
       end
 
@@ -64,6 +64,12 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
+      # Attributes accepted from a bulk-import row.
+      IMPORT_FIELDS = %i[
+        title company location modality url status match_score
+        salary_range company_size posted_date description source_id stack
+      ].freeze
+
       # POST /api/v1/offers/import
       # Body: { offers: [ { title:, company:, ... }, ... ] }
       # Dedupes by url; skips duplicates silently. Returns counts.
@@ -76,26 +82,17 @@ module Api
         errors  = []
 
         rows.each_with_index do |row, i|
-          row = row.with_indifferent_access
-          url = row[:url].to_s.strip
+          attrs = row.with_indifferent_access.slice(*IMPORT_FIELDS)
+          attrs[:stack] = Array(attrs[:stack]) if attrs.key?(:stack)
 
-          if url.present? && Offer.exists?(url: url)
-            skipped += 1
-            next
-          end
-
-          attrs = row.slice(
-            "title", "company", "location", "modality", "url", "status",
-            "match_score", "salary_range", "company_size", "posted_date",
-            "description", "source_id", "stack"
-          )
-          attrs["stack"] = Array(attrs["stack"]) if attrs.key?("stack")
-
-          offer = Offer.new(attrs)
-          if offer.save
+          result = Offers::Ingest.call(attrs)
+          case result.outcome
+          when :created
             created += 1
+          when :invalid
+            errors << { index: i, errors: result.errors }
           else
-            errors << { index: i, errors: offer.errors.full_messages }
+            skipped += 1
           end
         end
 
@@ -166,6 +163,14 @@ module Api
           :description, :source_id,
           stack: []
         )
+      end
+
+      def offer_attrs
+        attrs = offer_params.to_h
+        # A score typed into the form is the user's call — tag it so
+        # `rake offers:rescore` leaves it alone.
+        attrs[:score_source] = "manual" if attrs[:match_score].present?
+        attrs
       end
 
       def apply_filters(scope)
