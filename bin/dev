@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Starts the whole local stack — Rails API, Sidekiq worker, and the Vite
+# frontend — from one command. Processes are defined in Procfile.dev.
+#
+# Prerequisites (one-time):
+#   - PostgreSQL running, with a `jobtracker_development` database
+#     (bin/setup or `bin/rails db:prepare` from backend/ creates it)
+#   - redis-server installed and running (the Sidekiq worker needs it)
+#   - frontend deps installed (`cd frontend && npm install`)
+set -e
+
+cd "$(dirname "$0")/.."
+
+if ! gem list -i --silent foreman > /dev/null 2>&1; then
+  echo "== Installing foreman (one-time) =="
+  gem install foreman
+fi
+
+exec foreman start -f Procfile.dev "$@"
