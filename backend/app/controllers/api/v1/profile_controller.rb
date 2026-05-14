@@ -10,14 +10,15 @@ module Api
       # Catalog of what's available + the basic profile facts (used by
       # the UI to render buttons + previews).
       def files
+        profile = Profile.current
         render json: {
-          name:    profile_config["name"],
-          city:    profile_config["city"],
-          email:   profile_config["email"],
-          phone:   profile_config["phone"],
-          github:  profile_config["github"],
-          linkedin: profile_config["linkedin"],
-          cv:      cv_catalog,
+          name:     profile.name,
+          city:     profile.city,
+          email:    profile.email,
+          phone:    profile.phone,
+          github:   profile.github,
+          linkedin: profile.linkedin,
+          cv:       cv_catalog,
           cover_letters: cover_letter_catalog
         }
       end
@@ -54,10 +55,6 @@ module Api
       end
 
       private
-
-      def profile_config
-        Scorers::ProfileMatcher.config
-      end
 
       def profile_storage
         Rails.application.config.x.profile_storage

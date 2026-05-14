@@ -31,10 +31,12 @@ module Scrapers
     # run as its own search and the results are unioned (deduped by URL).
     # Several narrow queries beat one broad "developer" search: the guest
     # API has no profile awareness, so the query string is the only lever
-    # on relevance.
+    # on relevance. When no keywords are passed they come from the user's
+    # Profile (Settings page), falling back to a bare "developer" search.
     def fetch_raw(params)
       pages    = (params[:pages] || 4).to_i.clamp(1, MAX_PAGES)
       queries  = Array(params[:keywords]).filter_map { |k| k.to_s.strip.presence }
+      queries  = profile_keywords if queries.empty?
       queries  = [ "developer" ] if queries.empty?
       # Optional — when no location is given the guest endpoint searches
       # everywhere rather than being pinned to one country.
@@ -70,6 +72,10 @@ module Scrapers
     end
 
     private
+
+    def profile_keywords
+      Profile.current.linkedin_keywords.filter_map { |k| k.to_s.strip.presence }
+    end
 
     # Paginate one keyword query, returning its newly-seen cards. The
     # shared @seen set means a job surfaced by more than one query is

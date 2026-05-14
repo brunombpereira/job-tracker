@@ -1,7 +1,7 @@
 module Offers
   # Fills the mustache-style `{{token}}` placeholders in the PT/EN
-  # cover-letter templates from `storage/profile/cover_letters/` with
-  # data drawn from one Offer + the global profile config.
+  # cover-letter templates with data drawn from one Offer + the user's
+  # Profile.
   #
   # Returns plain markdown text. Anything still wrapped in `[…]` is a
   # human placeholder (the "specific company hook" paragraph) — the
@@ -58,16 +58,16 @@ module Offers
       }
     end
 
-    def profile_config
-      Scorers::ProfileMatcher.config
+    def profile
+      @profile ||= Profile.current
     end
 
     def profile_city
-      profile_config["city"].to_s.presence || "Aveiro"
+      profile.city.to_s.presence || (@lang == "en" ? "[Your city]" : "[A tua cidade]")
     end
 
     def profile_start_date
-      profile_config["start_date"].to_s.presence ||
+      profile.start_date.to_s.presence ||
         (@lang == "en" ? "immediately" : "imediato")
     end
 

@@ -1,10 +1,10 @@
 module Scorers
   # Assigns an integer 1–5 match_score to an Offer based on how well it
-  # aligns with the profile defined in config/profile.yml. Used by
-  # Scrapers::BaseClient when a scraped offer arrives without a score.
+  # aligns with the user's Profile. Used by Scrapers::BaseClient when a
+  # scraped offer arrives without a score.
   #
-  # The scoring rules are deliberately simple — adjust the YAML before
-  # touching the formula:
+  # The scoring rules are deliberately simple — tune the keyword lists in
+  # the Settings page before touching the formula:
   #   base 3 (neutral)
   #   +1 per primary-stack hit (capped +2)
   #   +1 if title carries a junior signal (positive_title)
@@ -13,32 +13,19 @@ module Scorers
   #   -1 if title carries a "mid-level" / X+ years signal
   # Result clamped to [1, 5].
   class ProfileMatcher
-    CONFIG_PATH = Rails.root.join("config", "profile.yml")
-
     class << self
       def score(attrs)
         new(attrs).score
       end
 
-      # Drops the cached YAML; tests that mutate the file (or want a
-      # reload between cases) should call this in their before/after.
+      # Drops the memoized keyword config — call after the profile is
+      # edited so the next score reflects the change.
       def reset_cache!
         @cached_config = nil
       end
 
       def config
-        return @cached_config if @cached_config && !Rails.env.development?
-        @cached_config = load_config
-      end
-
-      private
-
-      def load_config
-        return {} unless CONFIG_PATH.exist?
-        YAML.safe_load(CONFIG_PATH.read).to_h
-      rescue StandardError => e
-        Rails.logger.warn("[ProfileMatcher] config load failed: #{e.message}")
-        {}
+        @cached_config ||= Profile.current.matcher_config
       end
     end
 
@@ -77,7 +64,7 @@ module Scorers
     end
 
     # No primary OR secondary OR experimental match anywhere = a generic
-    # offer that probably doesn't fit Bruno's profile.
+    # offer that probably doesn't fit the profile.
     def no_signal?
       %w[primary secondary experimental].none? do |group|
         list(group).any? { |kw| matches?(kw) }

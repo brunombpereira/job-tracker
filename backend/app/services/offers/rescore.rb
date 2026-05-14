@@ -1,7 +1,7 @@
 module Offers
   # Recomputes match_score for auto-scored offers. Match scores are
-  # assigned once, at ingest time, from config/profile.yml — so editing
-  # that file leaves every existing offer on its stale score until this
+  # assigned once, at ingest time, from the user's Profile — so editing
+  # the profile leaves every existing offer on its stale score until this
   # runs. User-tuned scores (score_source "manual") are left untouched.
   #
   # Usage: Offers::Rescore.call  →  count of offers whose score changed.

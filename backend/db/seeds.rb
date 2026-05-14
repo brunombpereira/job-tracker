@@ -1,6 +1,10 @@
-# Seeds para arranque rápido — espelha as seed offers do Cowork (job_offers.json)
+# Seeds para arranque rápido — perfil em branco + sources + offers de exemplo.
 
-puts "🌱 A semear sources e offers..."
+puts "🌱 A semear profile, sources e offers..."
+
+# Single-row profile (column defaults). A fresh install lands here with a
+# blank profile; the user fills it in via the Settings page.
+Profile.current
 
 sources_data = {
   "Indeed"     => "#003A9B",
@@ -72,4 +76,4 @@ seed_offers.each do |attrs|
   end
 end
 
-puts "✅ #{Source.count} sources, #{Offer.count} offers, #{Note.count} notes"
+puts "✅ #{Profile.count} profile, #{Source.count} sources, #{Offer.count} offers, #{Note.count} notes"

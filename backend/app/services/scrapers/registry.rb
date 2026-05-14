@@ -82,17 +82,12 @@ module Scrapers
         key: "linkedin", display_name: "LinkedIn", tag: "HTML",
         client_class_name: "Scrapers::LinkedinGuestClient",
         color: "#0a66c2",
-        # The guest API has no profile awareness, so the keyword string
-        # is the only lever on relevance. Run a few narrow queries aimed
-        # at the profile (junior + the primary stacks) instead of one
-        # broad "developer" net; results are unioned and deduped.
-        # `location` is intentionally omitted — guest search runs
-        # worldwide unless a location is passed explicitly.
-        default_params: {
-          keywords: [ "junior developer", "ruby on rails developer", "react developer" ],
-          time: "month",
-          pages: 4
-        },
+        # Search keywords come from the user's Profile (Settings page) —
+        # the guest API has no profile awareness, so the query string is
+        # the only lever on relevance, and it's per-user config rather
+        # than a repo default. `location` is intentionally omitted: guest
+        # search runs worldwide unless a location is passed explicitly.
+        default_params: { time: "month", pages: 4 },
         env_required: []
       )
     ].freeze

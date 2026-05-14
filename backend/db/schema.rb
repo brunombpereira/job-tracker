@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_16_120002) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_16_120003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,26 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_16_120002) do
     t.index ["stack"], name: "index_offers_on_stack", using: :gin
     t.index ["status"], name: "index_offers_on_status"
     t.index ["url"], name: "index_offers_on_url", unique: true, where: "(url IS NOT NULL)"
+  end
+
+  create_table "profiles", force: :cascade do |t|
+    t.string "name"
+    t.string "city"
+    t.string "country"
+    t.string "email"
+    t.string "phone"
+    t.string "github"
+    t.string "linkedin"
+    t.string "start_date"
+    t.string "primary_keywords", default: [], null: false, array: true
+    t.string "secondary_keywords", default: [], null: false, array: true
+    t.string "experimental_keywords", default: [], null: false, array: true
+    t.string "positive_title_keywords", default: ["junior", "jr", "entry", "graduate", "trainee", "intern", "internship"], null: false, array: true
+    t.string "negative_title_keywords", default: ["mid-level", "5+ years", "7+ years", "8+ years", "10+ years"], null: false, array: true
+    t.string "location_bonus_keywords", default: ["remote", "remoto", "hybrid", "hibrido"], null: false, array: true
+    t.string "linkedin_keywords", default: ["developer"], null: false, array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "scraper_runs", force: :cascade do |t|

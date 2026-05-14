@@ -17,7 +17,7 @@ RSpec.describe Offers::CoverLetterGenerator do
       expect(text).to include("Junior Backend Developer")
       expect(text).to include("Acme")
       expect(text).to include("LinkedIn") # platform = source.name
-      expect(text).to include("Aveiro")   # from profile.yml
+      expect(text).to include("Aveiro")   # city from Profile.current
     end
 
     it "fills tokens for EN with English fallback wording" do
