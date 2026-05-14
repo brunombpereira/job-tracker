@@ -239,9 +239,8 @@ module Offers
       nil
     end
 
-    def sanitize(html, max: 2000)
-      return nil if html.blank?
-      ActionView::Base.full_sanitizer.sanitize(html.to_s).strip[0, max]
+    def sanitize(html)
+      Offers::DescriptionSanitizer.call(html)
     end
 
     def host
