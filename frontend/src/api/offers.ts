@@ -71,3 +71,9 @@ export const changeStatus = async (
 export const archiveOffer = async (id: number): Promise<void> => {
   await api.delete(`/offers/${id}`);
 };
+
+/** Backfill a missing description by fetching the offer's own page. */
+export const fetchOfferDescription = async (id: number): Promise<Offer> => {
+  const res = await api.post<Offer>(`/offers/${id}/fetch_description`);
+  return res.data;
+};

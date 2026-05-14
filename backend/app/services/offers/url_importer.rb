@@ -32,6 +32,10 @@ module Offers
       new(url).import
     end
 
+    def self.extract(url)
+      new(url).extract
+    end
+
     def initialize(url)
       @url = url.to_s.strip
     end
@@ -58,6 +62,20 @@ module Offers
       return result.offer if result.created?
 
       raise ImportError, ingest_error_message(result)
+    end
+
+    # Validate + fetch + parse a job URL, returning the schema.org /
+    # OpenGraph attrs hash — no dedup, no Offer creation. Used by the
+    # on-demand description fetcher.
+    def extract
+      raise ImportError, "URL em branco" if @url.empty?
+      raise ImportError, "URL inválido" unless @url.match?(%r{\Ahttps?://})
+
+      assert_safe_url!
+      attrs = extract_attrs(fetch_html)
+      raise ImportError, "Não encontrei conteúdo extraível nesta página" if attrs.blank?
+
+      attrs
     end
 
     private

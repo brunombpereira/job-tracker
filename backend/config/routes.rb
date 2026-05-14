@@ -28,6 +28,7 @@ Rails.application.routes.draw do
       resources :offers, only: %i[index show create update destroy] do
         member do
           patch :status
+          post :fetch_description
         end
         collection do
           post :import

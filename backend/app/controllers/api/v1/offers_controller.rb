@@ -1,7 +1,7 @@
 module Api
   module V1
     class OffersController < ApplicationController
-      before_action :set_offer, only: %i[show update destroy status]
+      before_action :set_offer, only: %i[show update destroy status fetch_description]
 
       DEFAULT_PER_PAGE = 24
       # Upper bound on page size — the Kanban view legitimately asks for
@@ -62,6 +62,15 @@ module Api
         render json: @offer
       rescue ArgumentError => e
         render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      # POST /api/v1/offers/:id/fetch_description
+      # HTML-scraped sources capture only the listing card, so those
+      # offers arrive without a description. This fetches the offer's own
+      # page and fills it in — on demand, when the offer is opened.
+      def fetch_description
+        Offers::DescriptionFetcher.call(@offer)
+        render json: @offer.reload
       end
 
       # Attributes accepted from a bulk-import row.

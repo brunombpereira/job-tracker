@@ -119,4 +119,20 @@ RSpec.describe Offers::UrlImporter do
         .to raise_error(described_class::ImportError, /Não encontrei/)
     end
   end
+
+  describe ".extract" do
+    it "returns the parsed attrs without creating an Offer" do
+      stub_request(:get, url).to_return(status: 200, body: html_with_jsonld)
+
+      attrs = nil
+      expect { attrs = described_class.extract(url) }.not_to change(Offer, :count)
+      expect(attrs[:title]).to eq("Senior Ruby Engineer")
+      expect(attrs[:description]).to include("Build great Rails apps")
+    end
+
+    it "rejects a blank URL" do
+      expect { described_class.extract("") }
+        .to raise_error(described_class::ImportError, /URL em branco/)
+    end
+  end
 end

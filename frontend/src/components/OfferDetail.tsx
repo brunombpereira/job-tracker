@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import type { Offer } from "@/types/offer";
-import { useCreateNote, useDeleteNote, useOfferDetail } from "@/hooks/useOfferDetail";
+import {
+  useCreateNote,
+  useDeleteNote,
+  useFetchDescription,
+  useOfferDetail,
+} from "@/hooks/useOfferDetail";
 import { StatusBadge } from "./StatusBadge";
 import { DescriptionView } from "./DescriptionView";
 import { ApplyKit } from "./ApplyKit";
@@ -30,6 +35,20 @@ export const OfferDetail = ({ offer, onEdit }: Props) => {
   const [draft, setDraft] = useState("");
 
   const detail = data ?? { ...offer, notes: [], status_changes: [] };
+
+  // HTML-scraped offers arrive without a description — fetch it on
+  // demand the first time this offer is opened. The ref guards against
+  // re-firing when the fetch finds nothing (description stays blank).
+  const { mutate: fetchDescription, isPending: descriptionLoading } =
+    useFetchDescription();
+  const attemptedRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (detail.description || !detail.url) return;
+    if (attemptedRef.current === detail.id) return;
+    attemptedRef.current = detail.id;
+    fetchDescription(detail.id);
+  }, [detail.id, detail.description, detail.url, fetchDescription]);
 
   const onAddNote = (e: FormEvent) => {
     e.preventDefault();
@@ -109,12 +128,16 @@ export const OfferDetail = ({ offer, onEdit }: Props) => {
 
       <ApplyKit offerId={offer.id} />
 
-      {detail.description && (
+      {(detail.description || descriptionLoading) && (
         <div>
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
             Description
           </h4>
-          <DescriptionView html={detail.description} stack={detail.stack} />
+          {detail.description ? (
+            <DescriptionView html={detail.description} stack={detail.stack} />
+          ) : (
+            <p className="text-xs text-ink-muted">A carregar descrição…</p>
+          )}
         </div>
       )}
 

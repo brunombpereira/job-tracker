@@ -313,4 +313,37 @@ RSpec.describe "Api::V1::Offers", type: :request do
       expect(offer.archived).to eq(true)
     end
   end
+
+  describe "POST /api/v1/offers/:id/fetch_description" do
+    let(:url) { "https://www.net-empregos.com/123/backend-developer/" }
+    let(:jsonld_html) do
+      body = {
+        "@type" => "JobPosting", "title" => "Backend Developer",
+        "description" => "<p>Maintain Rails services.</p>",
+        "hiringOrganization" => { "name" => "Acme" }
+      }.to_json
+      "<html><head><script type=\"application/ld+json\">#{body}</script></head></html>"
+    end
+
+    it "fills in a missing description from the offer's URL" do
+      offer = create(:offer, url: url, description: nil)
+      stub_request(:get, url).to_return(status: 200, body: jsonld_html)
+
+      post "/api/v1/offers/#{offer.id}/fetch_description"
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["description"]).to include("Maintain Rails services")
+      expect(offer.reload.description).to include("Maintain Rails services")
+    end
+
+    it "leaves an offer that already has a description untouched" do
+      offer = create(:offer, url: url, description: "already written")
+
+      post "/api/v1/offers/#{offer.id}/fetch_description"
+
+      expect(response).to have_http_status(:ok)
+      expect(offer.reload.description).to eq("already written")
+    end
+  end
 end

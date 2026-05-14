@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { createNote, deleteNote, getOffer } from "@/api/offers";
+import { createNote, deleteNote, fetchOfferDescription, getOffer } from "@/api/offers";
 import { describeError } from "@/api/errors";
+import type { OfferDetail } from "@/types/offer";
 
 export const useOfferDetail = (id: number | undefined) =>
   useQuery({
@@ -9,6 +10,24 @@ export const useOfferDetail = (id: number | undefined) =>
     queryFn: () => getOffer(id as number),
     enabled: typeof id === "number",
   });
+
+/**
+ * On-demand description backfill. HTML-scraped offers (LinkedIn,
+ * Net-Empregos, Teamlyzer) arrive without a description; this fetches it
+ * from the offer's own page and merges it into the cached detail.
+ * Silent — a failed fetch just leaves the offer description-less.
+ */
+export const useFetchDescription = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => fetchOfferDescription(id),
+    onSuccess: (offer) => {
+      qc.setQueryData<OfferDetail>(["offer", offer.id], (old) =>
+        old ? { ...old, description: offer.description } : old,
+      );
+    },
+  });
+};
 
 export const useCreateNote = () => {
   const qc = useQueryClient();
