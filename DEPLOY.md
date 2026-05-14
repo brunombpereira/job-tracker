@@ -41,6 +41,15 @@ ITJobs.pt scraping works out of the box (no key). For Adzuna:
 ### Step 2c: Sidekiq dashboard
 Available at `https://jobtracker-api.onrender.com/sidekiq`. Username `admin`, password from `SIDEKIQ_PASSWORD` env var (auto-generated, visible in Render dashboard).
 
+### Step 2d: Lock the API with `API_ACCESS_TOKEN` (do not skip)
+The API has no user accounts — it's gated by a single shared secret. **Without it, the deployed API serves everything, including your CV, email and phone, to anyone with the URL.**
+
+1. Generate a token: `ruby -rsecurerandom -e 'puts SecureRandom.hex(24)'`.
+2. Service **jobtracker-api** → **Environment** → add `API_ACCESS_TOKEN` with that value.
+3. Save (Render redeploys). The frontend now shows a login screen; enter the same token as the password.
+
+Leave it unset only for local development — the API stays open there. The app logs a security warning at boot if it's missing in production.
+
 ### Step 3: Note the URL
 After the deploy succeeds, the web service has a URL like `https://jobtracker-api.onrender.com`. Copy it.
 
@@ -100,3 +109,6 @@ Push any commit to `main` on GitHub. Render and Vercel both auto-redeploy. Migra
 
 **Frontend deploys but loads only blank**
 - `VITE_API_URL` is unset or wrong. Fix it in **Project → Settings → Environment Variables** and redeploy (env vars only apply on next build).
+
+**Login screen rejects the password**
+- The value entered must match `API_ACCESS_TOKEN` on Render exactly. Re-check the env var, and confirm the service finished redeploying after you set it.

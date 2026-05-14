@@ -38,6 +38,9 @@ Rails.application.routes.draw do
         resources :notes, only: %i[create destroy]
       end
 
+      # Shared-secret auth probe — see ApplicationController#authenticate_request!
+      get "auth", to: "auth#show"
+
       resources :scraper_runs, only: %i[index create] do
         collection { get :health }
       end
