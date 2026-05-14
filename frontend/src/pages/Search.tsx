@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { SourceCard } from "@/components/SourceCard";
+import { ScraperHealth } from "@/components/ScraperHealth";
 import { UrlImportPanel } from "@/components/UrlImportPanel";
 import { WipeOffersButton } from "@/components/WipeOffersButton";
 import { ManualPlatforms } from "@/components/ManualPlatforms";
@@ -141,6 +142,9 @@ export const Search = () => {
             ))}
           </div>
         )}
+        <div className="mt-3">
+          <ScraperHealth />
+        </div>
       </section>
 
       {/* Current batch summary */}

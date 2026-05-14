@@ -47,6 +47,7 @@ export const useSearchBatch = (id: number | null) => {
 
     qc.invalidateQueries({ queryKey: ["offers"] });
     qc.invalidateQueries({ queryKey: ["search_batches"] });
+    qc.invalidateQueries({ queryKey: ["scraper_health"] });
 
     const created = batch.offers_created;
     const sources = batch.runs.length;

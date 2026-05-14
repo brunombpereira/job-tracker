@@ -17,6 +17,26 @@ RSpec.describe "Api::V1::ScraperRuns", type: :request do
     end
   end
 
+  describe "GET /api/v1/scraper_runs/health" do
+    it "returns a health entry per registered source" do
+      ScraperRun.create!(source_name: "linkedin", status: "failed", error_message: "boom")
+      ScraperRun.create!(source_name: "linkedin", status: "failed", error_message: "boom")
+
+      get "/api/v1/scraper_runs/health"
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["sources"].size).to eq(Scrapers::Registry.available.size)
+
+      linkedin = body["sources"].find { |s| s["key"] == "linkedin" }
+      expect(linkedin["status"]).to eq("down")
+      expect(linkedin["consecutive_failures"]).to eq(2)
+
+      untouched = body["sources"].find { |s| s["key"] == "remotive" }
+      expect(untouched["status"]).to eq("unknown")
+    end
+  end
+
   describe "POST /api/v1/scraper_runs" do
     it "rejects unknown sources with 422" do
       post "/api/v1/scraper_runs", params: { source: "nope" }

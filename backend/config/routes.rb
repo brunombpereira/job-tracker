@@ -38,7 +38,9 @@ Rails.application.routes.draw do
         resources :notes, only: %i[create destroy]
       end
 
-      resources :scraper_runs, only: %i[index create]
+      resources :scraper_runs, only: %i[index create] do
+        collection { get :health }
+      end
       resources :search_batches, only: %i[index create show]
       resources :sources, only: %i[index]
 

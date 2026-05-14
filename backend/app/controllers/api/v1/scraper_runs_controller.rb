@@ -15,6 +15,14 @@ module Api
         }
       end
 
+      # GET /api/v1/scraper_runs/health
+      # Per-source reliability summary derived from recent run history —
+      # surfaces scrapers that have started failing or stopped finding
+      # offers (HTML scrapers break silently on site markup changes).
+      def health
+        render json: { sources: Scrapers::Health.report.map(&:as_json) }
+      end
+
       # POST /api/v1/scraper_runs
       # Body: { source: "adzuna", params: { keywords: "...", where: "..." } }
       # Enqueues a one-off ScraperRunJob immediately.
