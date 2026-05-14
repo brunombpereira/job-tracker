@@ -80,6 +80,33 @@ RSpec.describe Offers::UrlImporter do
         .to raise_error(described_class::ImportError, /URL inválido/)
     end
 
+    describe "SSRF guard" do
+      it "rejects loopback addresses" do
+        expect { described_class.import("http://127.0.0.1/job") }
+          .to raise_error(described_class::ImportError, /endereço interno/)
+      end
+
+      it "rejects the localhost hostname" do
+        expect { described_class.import("http://localhost/job") }
+          .to raise_error(described_class::ImportError, /endereço interno/)
+      end
+
+      it "rejects the cloud metadata / link-local range" do
+        expect { described_class.import("http://169.254.169.254/latest/meta-data/") }
+          .to raise_error(described_class::ImportError, /endereço interno/)
+      end
+
+      it "rejects private network addresses" do
+        expect { described_class.import("http://10.0.0.5/job") }
+          .to raise_error(described_class::ImportError, /endereço interno/)
+      end
+
+      it "rejects non-standard ports" do
+        expect { described_class.import("http://93.184.216.34:6379/job") }
+          .to raise_error(described_class::ImportError, /Porta não permitida/)
+      end
+    end
+
     it "raises ImportError with HTTP status on non-2xx" do
       stub_request(:get, url).to_return(status: 403)
       expect { described_class.import(url) }

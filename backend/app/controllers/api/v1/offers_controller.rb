@@ -3,6 +3,12 @@ module Api
     class OffersController < ApplicationController
       before_action :set_offer, only: %i[show update destroy status]
 
+      DEFAULT_PER_PAGE = 24
+      # Upper bound on page size — the Kanban view legitimately asks for
+      # 200 (see frontend KANBAN_LIMIT); anything above that is rejected
+      # so a caller can't request the whole table in one page.
+      MAX_PER_PAGE = 200
+
       # GET /api/v1/offers
       # Query params: include_archived=true to see archived offers in results.
       def index
@@ -11,7 +17,7 @@ module Api
         scope = apply_filters(scope)
         scope = apply_sort(scope)
 
-        pagy, offers = pagy(scope, items: params.fetch(:per_page, 24))
+        pagy, offers = pagy(scope, items: per_page)
 
         response.set_header("Total-Count",  pagy.count.to_s)
         response.set_header("Per-Page",     pagy.items.to_s)
@@ -146,6 +152,11 @@ module Api
 
       def set_offer
         @offer = Offer.find(params[:id])
+      end
+
+      def per_page
+        requested = params[:per_page].presence&.to_i || DEFAULT_PER_PAGE
+        requested.clamp(1, MAX_PER_PAGE)
       end
 
       def offer_params

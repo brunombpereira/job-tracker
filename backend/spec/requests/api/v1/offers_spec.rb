@@ -23,6 +23,13 @@ RSpec.describe "Api::V1::Offers", type: :request do
       expect(response.headers["Total-Count"].to_i).to eq(13) # 3 + 10
     end
 
+    it "clamps per_page to the maximum page size" do
+      get "/api/v1/offers", params: { per_page: 100_000 }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Per-Page"]).to eq(Api::V1::OffersController::MAX_PER_PAGE.to_s)
+    end
+
     it "excludes archived offers from the default index" do
       create(:offer, :archived)
       get "/api/v1/offers"

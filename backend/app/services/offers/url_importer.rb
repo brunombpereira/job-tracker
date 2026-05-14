@@ -1,3 +1,6 @@
+require "resolv"
+require "ipaddr"
+
 module Offers
   # On-demand offer importer for sources we don't scrape in bulk (LinkedIn,
   # Indeed, Glassdoor, individual company career pages). The user pastes a
@@ -14,6 +17,17 @@ module Offers
                  "AppleWebKit/537.36 (KHTML, like Gecko) " \
                  "Chrome/121.0.0.0 Safari/537.36"
 
+    ALLOWED_PORTS = [ 80, 443 ].freeze
+
+    # IP ranges that IPAddr's loopback?/private?/link_local? predicates do
+    # not already cover but that still must never be reachable from a
+    # server-side fetch.
+    BLOCKED_RANGES = [
+      IPAddr.new("0.0.0.0/8"),     # "this network"
+      IPAddr.new("100.64.0.0/10"), # CGNAT — common inside cloud networks
+      IPAddr.new("224.0.0.0/4")   # multicast
+    ].freeze
+
     def self.import(url)
       new(url).import
     end
@@ -25,6 +39,8 @@ module Offers
     def import
       raise ImportError, "URL em branco" if @url.empty?
       raise ImportError, "URL inválido" unless @url.match?(%r{\Ahttps?://})
+
+      assert_safe_url!
 
       if (existing = Offer.find_by(url: @url))
         raise ImportError,
@@ -55,7 +71,7 @@ module Offers
       "lever.co"      => { name: "Lever",     color: "#7a3ff7" },
       "greenhouse.io" => { name: "Greenhouse", color: "#19825e" },
       "workable.com"  => { name: "Workable",  color: "#5b3aeb" },
-      "ashbyhq.com"   => { name: "Ashby",     color: "#1f1f1f" },
+      "ashbyhq.com"   => { name: "Ashby",     color: "#1f1f1f" }
     }.freeze
 
     def source_for_host
@@ -63,6 +79,43 @@ module Offers
       meta = KNOWN_HOSTS.find { |key, _| h.include?(key) }&.last
       meta ||= { name: h.split(".").first.to_s.capitalize.presence || "Imported", color: "#94a3b8" }
       Source.find_or_create_by!(name: meta[:name]) { |s| s.color = meta[:color] }
+    end
+
+    # Guards against SSRF. The importer fetches a user-supplied URL
+    # server-side, so without this check a crafted URL could reach the
+    # cloud metadata endpoint (169.254.169.254) or internal services
+    # (localhost, the Redis/Postgres private network on Render). We
+    # reject non-standard ports and any host that resolves to a
+    # private, loopback, or link-local address.
+    #
+    # Faraday.get does not follow redirects, so there is no redirect-hop
+    # bypass today — but if a follow-redirects middleware is ever added,
+    # this check must run again per hop.
+    #
+    # Caveat: DNS is resolved here and again by Faraday at connect time,
+    # leaving a narrow DNS-rebinding window. Pinning the resolved IP
+    # would close it but means bypassing Faraday's connection handling —
+    # out of scope for now.
+    def assert_safe_url!
+      uri = URI.parse(@url)
+      raise ImportError, "URL inválido" unless uri.is_a?(URI::HTTP) && uri.host.present?
+
+      unless uri.port.nil? || ALLOWED_PORTS.include?(uri.port)
+        raise ImportError, "Porta não permitida"
+      end
+
+      addresses = Resolv.getaddresses(uri.host)
+      raise ImportError, "Não consegui resolver o domínio" if addresses.empty?
+
+      addresses.each do |addr|
+        ip = IPAddr.new(addr)
+        if ip.loopback? || ip.private? || ip.link_local? ||
+           BLOCKED_RANGES.any? { |range| range.include?(ip) }
+          raise ImportError, "URL aponta para um endereço interno"
+        end
+      end
+    rescue URI::InvalidURIError, IPAddr::Error
+      raise ImportError, "URL inválido"
     end
 
     def fetch_html
@@ -87,7 +140,7 @@ module Offers
     def job_attrs_from_jsonld(doc)
       doc.css('script[type="application/ld+json"]').each do |script|
         parsed = safe_json(script.text)
-        candidates = parsed.is_a?(Array) ? parsed : [parsed]
+        candidates = parsed.is_a?(Array) ? parsed : [ parsed ]
         candidates.each do |obj|
           next unless obj.is_a?(Hash)
           next unless job_posting?(obj)
@@ -116,7 +169,7 @@ module Offers
       Array(obj["jobLocation"]).map do |loc|
         addr = (loc.is_a?(Hash) ? loc["address"] : nil) || {}
         next if addr.empty?
-        [addr["addressLocality"], addr["addressRegion"], addr["addressCountry"]]
+        [ addr["addressLocality"], addr["addressRegion"], addr["addressCountry"] ]
           .compact_blank.join(", ")
       end.compact.uniq.first(2).join(" / ").presence
     end

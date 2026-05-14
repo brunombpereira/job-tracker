@@ -7,10 +7,18 @@ Rails.application.routes.draw do
 
   # Sidekiq dashboard at /sidekiq — protected by basic auth in production.
   # Username/password set via SIDEKIQ_USERNAME / SIDEKIQ_PASSWORD env vars.
+  # Fails closed: if either env var is unset, every request is denied
+  # (otherwise blank credentials would secure_compare("", "") => true).
   if Rails.env.production?
     Sidekiq::Web.use(Rack::Auth::Basic) do |user, password|
-      ActiveSupport::SecurityUtils.secure_compare(user, ENV.fetch("SIDEKIQ_USERNAME", "")) &&
-        ActiveSupport::SecurityUtils.secure_compare(password, ENV.fetch("SIDEKIQ_PASSWORD", ""))
+      expected_user = ENV["SIDEKIQ_USERNAME"].to_s
+      expected_password = ENV["SIDEKIQ_PASSWORD"].to_s
+      if expected_user.empty? || expected_password.empty?
+        false
+      else
+        ActiveSupport::SecurityUtils.secure_compare(user, expected_user) &&
+          ActiveSupport::SecurityUtils.secure_compare(password, expected_password)
+      end
     end
   end
   mount Sidekiq::Web => "/sidekiq"
