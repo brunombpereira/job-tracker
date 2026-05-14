@@ -76,6 +76,14 @@ RSpec.describe Scrapers::LinkedinGuestClient do
       .with { |req| !req.uri.query_values.key?("location") }
   end
 
+  it "runs a separate search per keyword when given an array" do
+    described_class.run(keywords: [ "ruby on rails", "react" ], pages: 1)
+    %w[ruby\ on\ rails react].each do |kw|
+      expect(WebMock).to have_requested(:get, %r{linkedin\.com/jobs-guest/jobs/api/seeMoreJobPostings/search})
+        .with(query: hash_including("keywords" => kw))
+    end
+  end
+
   it "paginates via the `start` offset and dedupes across pages" do
     described_class.run(pages: 3)
     # Same fixture returned on every page, so the dedup guard breaks the

@@ -58,9 +58,12 @@ linkedin_daily:
   cron: "30 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "LinkedIn · guest jobs API · 10 pages · broad worldwide developer net"
+  description: "LinkedIn · guest jobs API · 3 profile-targeted queries · worldwide"
   args:
     - "linkedin"
-    - keywords: "developer"
+    - keywords:
+        - "junior developer"
+        - "ruby on rails developer"
+        - "react developer"
       time: "month"
-      pages: 10
+      pages: 4

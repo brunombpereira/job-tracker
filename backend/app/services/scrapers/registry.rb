@@ -82,12 +82,17 @@ module Scrapers
         key: "linkedin", display_name: "LinkedIn", tag: "HTML",
         client_class_name: "Scrapers::LinkedinGuestClient",
         color: "#0a66c2",
-        # LinkedIn's guest API returns ~10 unique cards per request;
-        # 10 pages ≈ 90 unique listings after dedup. `location` is
-        # intentionally omitted — the guest search runs worldwide unless
-        # a location is passed explicitly. ProfileMatcher handles
-        # junior-vs-senior sorting afterwards.
-        default_params: { keywords: "developer", time: "month", pages: 10 },
+        # The guest API has no profile awareness, so the keyword string
+        # is the only lever on relevance. Run a few narrow queries aimed
+        # at the profile (junior + the primary stacks) instead of one
+        # broad "developer" net; results are unioned and deduped.
+        # `location` is intentionally omitted — guest search runs
+        # worldwide unless a location is passed explicitly.
+        default_params: {
+          keywords: [ "junior developer", "ruby on rails developer", "react developer" ],
+          time: "month",
+          pages: 4
+        },
         env_required: []
       )
     ].freeze

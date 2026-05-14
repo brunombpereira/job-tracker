@@ -27,34 +27,26 @@ module Scrapers
       "month" => "r2592000"
     }.freeze
 
+    # `keywords` accepts a single string or an array of strings — each is
+    # run as its own search and the results are unioned (deduped by URL).
+    # Several narrow queries beat one broad "developer" search: the guest
+    # API has no profile awareness, so the query string is the only lever
+    # on relevance.
     def fetch_raw(params)
       pages    = (params[:pages] || 4).to_i.clamp(1, MAX_PAGES)
-      keywords = params[:keywords].to_s.presence || "developer"
+      queries  = Array(params[:keywords]).filter_map { |k| k.to_s.strip.presence }
+      queries  = [ "developer" ] if queries.empty?
       # Optional — when no location is given the guest endpoint searches
       # everywhere rather than being pinned to one country.
       location = params[:location].to_s.presence
       time     = TIME_FILTERS[params[:time].to_s] # nil = any
       start_at = params[:start].to_i
 
+      @seen = Set.new
       cards = []
-      seen  = Set.new
-      pages.times do |i|
-        offset = start_at + i * PAGE_SIZE
-        page_cards = fetch_page(keywords, location, time, offset)
-        break if page_cards.empty?
-
-        new_in_page = 0
-        page_cards.each do |card|
-          attrs = extract(card)
-          next unless attrs
-          next if seen.include?(attrs[:url])
-          seen << attrs[:url]
-          cards << attrs
-          new_in_page += 1
-        end
-        break if new_in_page.zero?
-
-        polite_sleep(PAGE_DELAY) if i < pages - 1
+      queries.each_with_index do |query, qi|
+        cards.concat(collect_query(query, location, time, start_at, pages))
+        polite_sleep(PAGE_DELAY) if qi < queries.size - 1
       end
       cards
     rescue Faraday::Error => e
@@ -78,6 +70,33 @@ module Scrapers
     end
 
     private
+
+    # Paginate one keyword query, returning its newly-seen cards. The
+    # shared @seen set means a job surfaced by more than one query is
+    # kept once.
+    def collect_query(query, location, time, start_at, pages)
+      collected = []
+      pages.times do |i|
+        offset = start_at + i * PAGE_SIZE
+        page_cards = fetch_page(query, location, time, offset)
+        break if page_cards.empty?
+
+        new_in_page = 0
+        page_cards.each do |card|
+          attrs = extract(card)
+          next unless attrs
+          next if @seen.include?(attrs[:url])
+
+          @seen << attrs[:url]
+          collected << attrs
+          new_in_page += 1
+        end
+        break if new_in_page.zero?
+
+        polite_sleep(PAGE_DELAY) if i < pages - 1
+      end
+      collected
+    end
 
     def fetch_page(keywords, location, time, offset)
       res = Faraday.get(ENDPOINT) do |r|
