@@ -5,33 +5,6 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 
-const browserGlobals = {
-  window: "readonly",
-  document: "readonly",
-  console: "readonly",
-  fetch: "readonly",
-  setTimeout: "readonly",
-  clearTimeout: "readonly",
-  setInterval: "readonly",
-  clearInterval: "readonly",
-  localStorage: "readonly",
-  sessionStorage: "readonly",
-  navigator: "readonly",
-  location: "readonly",
-  HTMLElement: "readonly",
-  HTMLInputElement: "readonly",
-  HTMLButtonElement: "readonly",
-  HTMLDivElement: "readonly",
-  Event: "readonly",
-  KeyboardEvent: "readonly",
-  MouseEvent: "readonly",
-  confirm: "readonly",
-  alert: "readonly",
-  prompt: "readonly",
-  URL: "readonly",
-  URLSearchParams: "readonly",
-};
-
 const nodeGlobals = {
   __dirname: "readonly",
   __filename: "readonly",
@@ -48,12 +21,15 @@ export default [
     languageOptions: {
       parser: tsParser,
       parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } },
-      globals: browserGlobals,
     },
     plugins: { "@typescript-eslint": tsPlugin, "react-hooks": reactHooks, "react-refresh": reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // TypeScript itself resolves identifiers (DOM lib types, React, etc.)
+      // and the build runs `tsc -b`, so the ESLint core rule is both
+      // redundant and wrong here — it can't see TS's global type universe.
+      "no-undef": "off",
       // Disable base no-unused-vars in favour of the TS-aware one — base
       // flags TS type-position parameter names like `(filters: T) => void`.
       "no-unused-vars": "off",

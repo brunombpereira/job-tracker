@@ -39,7 +39,6 @@ export function DescriptionView({ html, stack = [], className = "" }: Props) {
   return (
     <div
       className={`offer-description text-sm leading-relaxed text-ink-soft ${className}`}
-      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: rendered }}
     />
   );

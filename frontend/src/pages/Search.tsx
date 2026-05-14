@@ -35,7 +35,7 @@ export const Search = () => {
   const [activeId, setActiveId] = useState<number | null>(null);
   const activeBatch = useSearchBatch(activeId);
 
-  const sources = data?.sources ?? [];
+  const sources = useMemo(() => data?.sources ?? [], [data?.sources]);
   const recentBatches = data?.batches ?? [];
 
   // Restore the most-recent batch on first paint so a refresh during a run

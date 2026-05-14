@@ -75,6 +75,9 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Co-located with its provider by design; the hook export trips
+// react-refresh's component-only heuristic but is safe here.
+// eslint-disable-next-line react-refresh/only-export-components
 export function useConfirm(): ConfirmFn {
   const fn = useContext(ConfirmContext);
   if (!fn) throw new Error("useConfirm must be used inside <ConfirmProvider>");
