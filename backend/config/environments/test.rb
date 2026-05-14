@@ -13,4 +13,8 @@ Rails.application.configure do
   config.action_controller.allow_forgery_protection = false
   config.active_support.deprecation = :stderr
   config.active_support.disallowed_deprecation = :raise
+
+  # The real CV/cover-letter files are gitignored, so specs read from
+  # committed fixtures instead. See spec/fixtures/profile/.
+  config.x.profile_storage = Rails.root.join("spec", "fixtures", "profile")
 end

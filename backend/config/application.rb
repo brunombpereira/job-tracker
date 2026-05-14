@@ -25,5 +25,11 @@ module JobTracker
 
     # Autoload paths
     config.autoload_lib(ignore: %w[assets tasks])
+
+    # Root for personal profile artefacts (CV PDFs, cover-letter
+    # templates) consumed by ProfileController and CoverLetterGenerator.
+    # These files live outside the repo (see .gitignore); the test env
+    # repoints this at committed fixtures.
+    config.x.profile_storage = Rails.root.join("storage", "profile")
   end
 end

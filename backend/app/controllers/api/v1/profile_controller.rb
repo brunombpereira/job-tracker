@@ -59,8 +59,12 @@ module Api
         Scorers::ProfileMatcher.config
       end
 
+      def profile_storage
+        Rails.application.config.x.profile_storage
+      end
+
       def cv_root
-        Rails.root.join("storage", "profile", "cv")
+        profile_storage.join("cv")
       end
 
       def cv_path_for(lang, format)
@@ -83,7 +87,7 @@ module Api
 
       def cover_letter_catalog
         %w[pt en].each_with_object({}) do |lang, out|
-          path = Rails.root.join("storage", "profile", "cover_letters", "template_#{lang}.md")
+          path = profile_storage.join("cover_letters", "template_#{lang}.md")
           out[lang] = path.exist?
         end
       end

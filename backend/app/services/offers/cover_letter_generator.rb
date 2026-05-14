@@ -9,7 +9,6 @@ module Offers
   # the user.
   class CoverLetterGenerator
     SUPPORTED_LANGS = %w[pt en].freeze
-    TEMPLATE_DIR    = Rails.root.join("storage", "profile", "cover_letters")
 
     class MissingTemplate < StandardError; end
 
@@ -37,9 +36,14 @@ module Offers
     private
 
     def read_template
-      path = TEMPLATE_DIR.join("template_#{@lang}.md")
+      path = template_dir.join("template_#{@lang}.md")
       raise MissingTemplate, "no template at #{path}" unless path.exist?
+
       path.read
+    end
+
+    def template_dir
+      Rails.application.config.x.profile_storage.join("cover_letters")
     end
 
     def tokens
@@ -50,7 +54,7 @@ module Offers
         "position_title" => @offer.title.to_s.presence  || "[Título da posição]",
         "platform"       => platform_label,
         "recipient_name" => recipient_placeholder,
-        "start_date"     => profile_start_date,
+        "start_date"     => profile_start_date
       }
     end
 
