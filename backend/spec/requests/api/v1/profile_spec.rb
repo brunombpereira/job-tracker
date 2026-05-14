@@ -1,6 +1,44 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Profile", type: :request do
+  describe "GET /api/v1/profile" do
+    it "returns the editable profile fields" do
+      get "/api/v1/profile"
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body).to include("name", "city", "email", "primary_keywords", "linkedin_keywords")
+      expect(body["primary_keywords"]).to be_an(Array)
+    end
+  end
+
+  describe "PATCH /api/v1/profile" do
+    it "updates personal details and keyword lists" do
+      patch "/api/v1/profile", params: {
+        profile: {
+          name: "Ada Lovelace",
+          city: "Lisboa",
+          primary_keywords: %w[elixir phoenix],
+          linkedin_keywords: [ "junior elixir developer" ]
+        }
+      }
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["name"]).to eq("Ada Lovelace")
+      expect(body["primary_keywords"]).to eq(%w[elixir phoenix])
+
+      profile = Profile.current
+      expect(profile.city).to eq("Lisboa")
+      expect(profile.linkedin_keywords).to eq([ "junior elixir developer" ])
+    end
+
+    it "resets the ProfileMatcher cache so new keywords take effect" do
+      expect(Scorers::ProfileMatcher).to receive(:reset_cache!)
+      patch "/api/v1/profile", params: { profile: { city: "Porto" } }
+    end
+  end
+
   describe "GET /api/v1/profile/files" do
     it "returns the profile catalog with CV + cover-letter availability flags" do
       get "/api/v1/profile/files"

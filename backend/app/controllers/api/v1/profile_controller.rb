@@ -6,6 +6,19 @@ module Api
     # OfferDetail modal so the user can download what they need for the
     # specific listing they're looking at.
     class ProfileController < ApplicationController
+      # GET /api/v1/profile — the editable profile (personal details +
+      # scoring keyword lists), consumed by the Settings page.
+      def show
+        render json: profile_json
+      end
+
+      # PATCH /api/v1/profile
+      def update
+        Profile.current.update!(profile_params)
+        Scorers::ProfileMatcher.reset_cache!
+        render json: profile_json
+      end
+
       # GET /api/v1/profile/files
       # Catalog of what's available + the basic profile facts (used by
       # the UI to render buttons + previews).
@@ -55,6 +68,17 @@ module Api
       end
 
       private
+
+      def profile_json
+        Profile.current.as_json(only: Profile::DETAIL_FIELDS + Profile::KEYWORD_FIELDS)
+      end
+
+      def profile_params
+        params.require(:profile).permit(
+          *Profile::DETAIL_FIELDS,
+          *Profile::KEYWORD_FIELDS.map { |field| { field => [] } }
+        )
+      end
 
       def profile_storage
         Rails.application.config.x.profile_storage

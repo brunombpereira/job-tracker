@@ -47,7 +47,11 @@ Rails.application.routes.draw do
       resources :search_batches, only: %i[index create show]
       resources :sources, only: %i[index]
 
-      # Personal CV + cover letter served from storage/profile/.
+      # The editable profile (personal details + scoring keywords).
+      get   "profile", to: "profile#show"
+      patch "profile", to: "profile#update"
+
+      # Personal CV + cover letter artefacts.
       get "profile/files",         to: "profile#files"
       get "profile/cv",            to: "profile#cv"
       get "profile/cover_letter",  to: "profile#cover_letter"
