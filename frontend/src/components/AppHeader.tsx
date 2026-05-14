@@ -16,7 +16,7 @@ interface Props {
 export function AppHeader({ tab, onTabChange, actions, subtitle }: Props) {
   return (
     <header className="border-b border-edge bg-surface-raised">
-      <div className="mx-auto flex max-w-[110rem] flex-wrap items-center justify-between gap-3 px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
         <div>
           <h1 className="font-serif text-2xl text-ink">JobTracker</h1>
           {subtitle && (

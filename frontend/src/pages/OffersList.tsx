@@ -151,7 +151,7 @@ export const OffersList = ({ tab, onTabChange }: OffersListProps) => {
         }
       />
 
-      <main className="mx-auto max-w-[110rem] px-4 py-8">
+      <main className="px-4 py-8">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             type="search"

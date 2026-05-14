@@ -33,7 +33,7 @@ export default function App() {
           onTabChange={setTab}
           subtitle="Procura automática de ofertas"
         />
-        <main className="mx-auto max-w-[110rem] px-4 py-8">
+        <main className="px-4 py-8">
           <Search />
         </main>
       </div>
