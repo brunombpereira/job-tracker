@@ -23,10 +23,3 @@
 
 # RSpec persistence
 /spec/examples.txt
-
-# ProfileController storage — track only the structure README so the
-# personal PDFs/docx/templates never end up in the public repo.
-!/storage/profile/
-!/storage/profile/README.md
-/storage/profile/cv/
-/storage/profile/cover_letters/

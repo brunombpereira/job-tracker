@@ -8,6 +8,14 @@ def system!(*args)
 end
 
 FileUtils.chdir APP_ROOT do
+  unless File.exist?(".env")
+    puts "== No .env found =="
+    puts "  Copy .env.example to .env and fill it in if your local Postgres"
+    puts "  isn't reachable with the postgres/postgres default in"
+    puts "  config/database.yml. Continuing anyway..."
+    puts
+  end
+
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 

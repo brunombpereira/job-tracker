@@ -19,24 +19,16 @@ Total deploy time: ~15 minutes the first time, fully automatic afterwards (push 
 The repo has a `render.yaml` at the root that provisions FOUR services:
 
 - **`jobtracker-api`** — Rails API (Puma) — the public endpoint
-- **`jobtracker-worker`** — Sidekiq worker — runs scraper jobs (Adzuna, ITJobs.pt) on the daily 06:00 UTC cron
+- **`jobtracker-worker`** — Sidekiq worker — runs the job-board scrapers on the daily 06:00 UTC cron
 - **`jobtracker-redis`** — Redis instance — Sidekiq broker
 - **`jobtracker-db`** — PostgreSQL 16
 
 1. In Render, click **New +** → **Blueprint**.
-2. Click **Connect a repository** and pick `brunombpereira/job-tracker`.
+2. Click **Connect a repository** and pick your fork of this repo.
 3. Render reads `render.yaml` and shows the 4 resources. Click **Apply**.
 4. Provisioning takes ~5-7 min (database first, then Redis, then web + worker in parallel).
 
-The `bin/render-build` script runs migrations + idempotent seeds on the web service's build, so you get the 7 placeholder offers automatically.
-
-### Step 2b (optional): Activate Adzuna scraper
-ITJobs.pt scraping works out of the box (no key). For Adzuna:
-
-1. Register a free app at https://developer.adzuna.com → get APP_ID + APP_KEY.
-2. In Render dashboard → service `jobtracker-api` → Environment, set `ADZUNA_APP_ID` and `ADZUNA_APP_KEY`.
-3. Repeat for service `jobtracker-worker` (same values).
-4. Both services redeploy. The 06:00 UTC cron starts fetching the next day, or trigger manually from the "Procurar" tab in the UI.
+The `bin/render-build` script runs migrations + idempotent seeds on the web service's build, so you get a blank profile and the placeholder offers automatically.
 
 ### Step 2c: Sidekiq dashboard
 Available at `https://jobtracker-api.onrender.com/sidekiq`. Username `admin`, password from `SIDEKIQ_PASSWORD` env var (auto-generated, visible in Render dashboard).
@@ -61,8 +53,8 @@ Once the frontend is up on Vercel (see below), come back to Render:
 3. Save. Render redeploys automatically (~1 min).
 
 ### Test it
-- Open `https://jobtracker-api.onrender.com/api/v1/offers` in your browser. You should see a JSON array with 7 offers.
-- Check `https://jobtracker-api.onrender.com/up` returns HTTP 200 — that's the health check Render polls.
+- Check `https://jobtracker-api.onrender.com/up` returns HTTP 200 — that's the health check Render polls (it's not behind the API token).
+- `https://jobtracker-api.onrender.com/api/v1/offers` returns `401 Unauthorized` once `API_ACCESS_TOKEN` is set — that's expected. The frontend's login screen is how you get past it.
 
 > ⚠️ Free tier spins down after 15 minutes idle. The first request after idle takes ~30 seconds to wake up. That's normal — for portfolio demo it's acceptable, for production upgrade to the Starter plan ($7/month).
 
@@ -75,7 +67,7 @@ Once the frontend is up on Vercel (see below), come back to Render:
 
 ### Step 2: Import the repo
 1. Click **Add New** → **Project**.
-2. Pick `brunombpereira/job-tracker` from the list.
+2. Pick your fork of this repo from the list.
 3. **Crucial step — Root Directory**: click **Edit** next to the project root and set it to `frontend`. Vercel will then detect Vite and pre-fill the Build Command (`npm run build`) and Output Directory (`dist`).
 4. Open **Environment Variables** and add:
    - `VITE_API_URL` = the Render URL from step 1, with `/api/v1` appended. Example: `https://jobtracker-api.onrender.com/api/v1`
