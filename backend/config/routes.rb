@@ -55,6 +55,8 @@ Rails.application.routes.draw do
       get "profile/files",         to: "profile#files"
       get "profile/cv",            to: "profile#cv"
       get "profile/cover_letter",  to: "profile#cover_letter"
+      post   "profile/documents",       to: "profile#upload"
+      delete "profile/documents/:kind", to: "profile#destroy_document"
 
       get "stats", to: "stats#index"
     end

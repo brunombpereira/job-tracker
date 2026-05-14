@@ -11,6 +11,8 @@ RSpec.describe Offers::CoverLetterGenerator do
     )
   end
 
+  before { seed_cover_letter_templates }
+
   describe ".generate" do
     it "fills the company / position / platform tokens for PT" do
       text = described_class.generate(offer: offer, lang: "pt")

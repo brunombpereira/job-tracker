@@ -36,14 +36,11 @@ module Offers
     private
 
     def read_template
-      path = template_dir.join("template_#{@lang}.md")
-      raise MissingTemplate, "no template at #{path}" unless path.exist?
+      doc = ProfileDocument.for_kind("template_#{@lang}")
+      raise MissingTemplate, "no cover-letter template uploaded for '#{@lang}'" unless doc
 
-      path.read
-    end
-
-    def template_dir
-      Rails.application.config.x.profile_storage.join("cover_letters")
+      # Stored as bytes (bytea); the template is UTF-8 markdown.
+      doc.data.dup.force_encoding(Encoding::UTF_8)
     end
 
     def tokens

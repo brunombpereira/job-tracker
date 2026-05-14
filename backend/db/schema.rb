@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_05_16_120003) do
+ActiveRecord::Schema[7.1].define(version: 2026_05_16_120004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -48,6 +48,16 @@ ActiveRecord::Schema[7.1].define(version: 2026_05_16_120003) do
     t.index ["stack"], name: "index_offers_on_stack", using: :gin
     t.index ["status"], name: "index_offers_on_status"
     t.index ["url"], name: "index_offers_on_url", unique: true, where: "(url IS NOT NULL)"
+  end
+
+  create_table "profile_documents", force: :cascade do |t|
+    t.string "kind", null: false
+    t.string "filename", null: false
+    t.string "content_type", null: false
+    t.binary "data", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kind"], name: "index_profile_documents_on_kind", unique: true
   end
 
   create_table "profiles", force: :cascade do |t|

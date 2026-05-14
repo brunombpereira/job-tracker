@@ -1,10 +1,8 @@
 module Api
   module V1
-    # Serves the personal artefacts (CV, cover-letter templates, generated
-    # cover letters) that live in backend/storage/profile/ but never go
-    # to the public repo. The frontend hits these endpoints from the
-    # OfferDetail modal so the user can download what they need for the
-    # specific listing they're looking at.
+    # The editable profile (personal details + scoring keywords) plus the
+    # personal artefacts — CV PDFs and cover-letter templates — which are
+    # uploaded through the app and stored as ProfileDocument rows.
     class ProfileController < ApplicationController
       # GET /api/v1/profile — the editable profile (personal details +
       # scoring keyword lists), consumed by the Settings page.
@@ -37,18 +35,18 @@ module Api
       end
 
       # GET /api/v1/profile/cv?lang=pt|en&format=visual|ats
-      # Streams the matching CV file from disk with a download disposition.
+      # Streams the matching uploaded CV with a download disposition.
       def cv
         lang   = params.fetch(:lang,   "pt").to_s
         format = params.fetch(:format, "visual").to_s
-        path = cv_path_for(lang, format)
-        return head :not_found unless path&.exist?
+        doc = ProfileDocument.for_kind("cv_#{lang}_#{format}")
+        return head :not_found unless doc
 
-        send_file path, type: mime_for(path), disposition: "attachment", filename: path.basename.to_s
+        send_data doc.data, type: doc.content_type, disposition: "attachment", filename: doc.filename
       end
 
       # GET /api/v1/profile/cover_letter?offer_id=:id&lang=pt|en[&download=true]
-      # Generates a per-offer cover letter from the template.
+      # Generates a per-offer cover letter from the uploaded template.
       def cover_letter
         offer = Offer.find(params.require(:offer_id))
         lang  = params.fetch(:lang, "pt").to_s
@@ -67,6 +65,31 @@ module Api
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
+      # POST /api/v1/profile/documents
+      # multipart: kind=<ProfileDocument::KINDS>, file=<upload>
+      # Creates or replaces the document in that slot.
+      def upload
+        kind = params.require(:kind).to_s
+        file = params.require(:file)
+
+        doc = ProfileDocument.find_or_initialize_by(kind: kind)
+        doc.assign_attributes(
+          filename:     file.original_filename,
+          content_type: file.content_type.presence || "application/octet-stream",
+          data:         file.read
+        )
+        doc.save!
+        render json: { kind: doc.kind, filename: doc.filename }
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      # DELETE /api/v1/profile/documents/:kind
+      def destroy_document
+        ProfileDocument.for_kind(params[:kind])&.destroy
+        head :no_content
+      end
+
       private
 
       def profile_json
@@ -80,45 +103,20 @@ module Api
         )
       end
 
-      def profile_storage
-        Rails.application.config.x.profile_storage
-      end
-
-      def cv_root
-        profile_storage.join("cv")
-      end
-
-      def cv_path_for(lang, format)
-        return nil unless %w[pt en].include?(lang)
-        dir = cv_root.join(lang)
-        return nil unless dir.exist?
-
-        pattern = format == "ats" ? "*ATS*" : "*Visual*"
-        dir.glob(pattern).first
-      end
-
+      # { pt: { visual: filename, ats: filename }, en: {...} } — only the
+      # slots that actually have an uploaded document.
       def cv_catalog
         %w[pt en].each_with_object({}) do |lang, out|
-          out[lang] = {
-            visual: cv_path_for(lang, "visual")&.basename&.to_s,
-            ats:    cv_path_for(lang, "ats")&.basename&.to_s
-          }.compact
+          out[lang] = %w[visual ats].each_with_object({}) do |format, slots|
+            doc = ProfileDocument.for_kind("cv_#{lang}_#{format}")
+            slots[format.to_sym] = doc.filename if doc
+          end
         end
       end
 
       def cover_letter_catalog
         %w[pt en].each_with_object({}) do |lang, out|
-          path = profile_storage.join("cover_letters", "template_#{lang}.md")
-          out[lang] = path.exist?
-        end
-      end
-
-      def mime_for(path)
-        case path.extname.downcase
-        when ".pdf"  then "application/pdf"
-        when ".docx" then "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        when ".html" then "text/html; charset=utf-8"
-        else "application/octet-stream"
+          out[lang] = ProfileDocument.exists?(kind: "template_#{lang}")
         end
       end
     end

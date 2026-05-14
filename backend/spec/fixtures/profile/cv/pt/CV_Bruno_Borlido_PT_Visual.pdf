@@ -1,5 +1,0 @@
-%PDF-1.4
-Test fixture standing in for the real CV PDF. ProfileController only
-streams these bytes and sets the MIME type from the .pdf extension, so
-the content here is irrelevant to the specs.
-%%EOF
