@@ -30,7 +30,9 @@ module Scrapers
     def fetch_raw(params)
       pages    = (params[:pages] || 4).to_i.clamp(1, MAX_PAGES)
       keywords = params[:keywords].to_s.presence || "developer"
-      location = params[:location].to_s.presence || "Portugal"
+      # Optional — when no location is given the guest endpoint searches
+      # everywhere rather than being pinned to one country.
+      location = params[:location].to_s.presence
       time     = TIME_FILTERS[params[:time].to_s] # nil = any
       start_at = params[:start].to_i
 
@@ -84,7 +86,7 @@ module Scrapers
         r.headers["Accept"]          = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
         r.headers["Accept-Language"] = "en-US,en;q=0.9,pt;q=0.8"
         r.params["keywords"] = keywords
-        r.params["location"] = location
+        r.params["location"] = location if location
         r.params["start"]    = offset if offset.positive?
         r.params["f_TPR"]    = time   if time
       end

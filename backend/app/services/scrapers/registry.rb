@@ -63,11 +63,10 @@ module Scrapers
         key: "net_empregos", display_name: "Net-Empregos", tag: "HTML",
         client_class_name: "Scrapers::NetEmpregosClient",
         color: "#1d3557",
-        # Net-Empregos has 1.5k+ Programação listings but the RSS feed
-        # was only surfacing ~4. We now paginate the HTML category
-        # listing (18 items/page) — 3 pages → 54 freshest listings.
-        # Pass `pages: N` (1–8) to widen further.
-        default_params: { pages: 3 },
+        # Net-Empregos runs ~88 pages of 18 Programação listings. We
+        # paginate the HTML category listing — 20 pages → ~360 of the
+        # freshest. Pass `pages: N` (1–50) to widen or narrow.
+        default_params: { pages: 20 },
         env_required: []
       ),
       Source.new(
@@ -84,10 +83,11 @@ module Scrapers
         client_class_name: "Scrapers::LinkedinGuestClient",
         color: "#0a66c2",
         # LinkedIn's guest API returns ~10 unique cards per request;
-        # 10 pages ≈ 90 unique listings after dedup, which is roughly
-        # what the public preview surfaces for a broad query.
-        # ProfileMatcher handles junior-vs-senior sorting afterwards.
-        default_params: { keywords: "developer", location: "Portugal", time: "month", pages: 10 },
+        # 10 pages ≈ 90 unique listings after dedup. `location` is
+        # intentionally omitted — the guest search runs worldwide unless
+        # a location is passed explicitly. ProfileMatcher handles
+        # junior-vs-senior sorting afterwards.
+        default_params: { keywords: "developer", time: "month", pages: 10 },
         env_required: []
       )
     ].freeze

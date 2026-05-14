@@ -40,10 +40,10 @@ net_empregos_daily:
   cron: "20 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "Net-Empregos · HTML · 3 pages of Programação (~54 listings)"
+  description: "Net-Empregos · HTML · 20 pages of Programação (~360 listings)"
   args:
     - "net_empregos"
-    - pages: 3
+    - pages: 20
 
 teamlyzer_daily:
   cron: "25 6 * * *"
@@ -58,10 +58,9 @@ linkedin_daily:
   cron: "30 6 * * *"
   class: ScraperRunJob
   queue: scrapers
-  description: "LinkedIn · guest jobs API · 10 pages · broad PT developer net"
+  description: "LinkedIn · guest jobs API · 10 pages · broad worldwide developer net"
   args:
     - "linkedin"
     - keywords: "developer"
-      location: "Portugal"
       time: "month"
       pages: 10

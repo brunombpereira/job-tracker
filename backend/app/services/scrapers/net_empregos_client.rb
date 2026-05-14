@@ -21,7 +21,10 @@ module Scrapers
     # different slugs, so swap both via params if/when needed.
     DEFAULT_CATEGORY_PATH = "empregos-portugal-informatica-programacao.asp"
     DEFAULT_CATEGORIA     = 5
-    MAX_PAGES             = 8
+    # The Programação category runs ~88 pages of 18 listings. 8 was far
+    # too shallow to approach full coverage; 50 (~900 listings) gets the
+    # bulk of what's live while staying a bounded crawl.
+    MAX_PAGES             = 50
     PAGE_DELAY            = 0.5  # seconds, between paginated requests
 
     def fetch_raw(params)

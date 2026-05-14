@@ -70,6 +70,12 @@ RSpec.describe Scrapers::LinkedinGuestClient do
       .with(query: hash_including("keywords" => "rails dev", "location" => "Porto", "f_TPR" => "r604800"))
   end
 
+  it "omits the location param entirely when no location is given" do
+    described_class.run(keywords: "developer", pages: 1)
+    expect(WebMock).to have_requested(:get, %r{linkedin\.com/jobs-guest/jobs/api/seeMoreJobPostings/search})
+      .with { |req| !req.uri.query_values.key?("location") }
+  end
+
   it "paginates via the `start` offset and dedupes across pages" do
     described_class.run(pages: 3)
     # Same fixture returned on every page, so the dedup guard breaks the
