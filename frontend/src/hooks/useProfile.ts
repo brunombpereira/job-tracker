@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  deleteProfileDocument,
   getProfile,
   getProfileFiles,
   updateProfile,
+  uploadProfileDocument,
+  type DocumentKind,
   type Profile,
 } from "@/api/profile";
 import { describeError } from "@/api/errors";
@@ -33,6 +36,35 @@ export const useUpdateProfile = () => {
     },
     onError: (err) => {
       toast.error(`Não foi possível guardar: ${describeError(err)}`);
+    },
+  });
+};
+
+export const useUploadDocument = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ kind, file }: { kind: DocumentKind; file: File }) =>
+      uploadProfileDocument(kind, file),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["profile_files"] });
+      toast.success("Documento carregado");
+    },
+    onError: (err) => {
+      toast.error(`Falha no upload: ${describeError(err)}`);
+    },
+  });
+};
+
+export const useDeleteDocument = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (kind: DocumentKind) => deleteProfileDocument(kind),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["profile_files"] });
+      toast.success("Documento removido");
+    },
+    onError: (err) => {
+      toast.error(`Falha ao remover: ${describeError(err)}`);
     },
   });
 };

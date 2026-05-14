@@ -74,3 +74,27 @@ export const coverLetterDownloadUrl = (offerId: number, lang: "pt" | "en"): stri
   const params = new URLSearchParams({ offer_id: String(offerId), lang, download: "true" });
   return `${base}/profile/cover_letter?${params.toString()}`;
 };
+
+export type DocumentKind =
+  | "cv_pt_visual"
+  | "cv_pt_ats"
+  | "cv_en_visual"
+  | "cv_en_ats"
+  | "template_pt"
+  | "template_en";
+
+export const uploadProfileDocument = async (
+  kind: DocumentKind,
+  file: File,
+): Promise<void> => {
+  const form = new FormData();
+  form.append("kind", kind);
+  form.append("file", file);
+  await api.post("/profile/documents", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+export const deleteProfileDocument = async (kind: DocumentKind): Promise<void> => {
+  await api.delete(`/profile/documents/${kind}`);
+};
